@@ -1,0 +1,9 @@
+# Just all jars
+*.jar
+# Hidden files
+.*
+# Log files
+*.log
+
+# Also, all worlds
+/worlds/
