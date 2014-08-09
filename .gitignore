@@ -4,6 +4,8 @@
 .*
 # Log files
 *.log
+# Data
+*.db
 
 # Also, all worlds
 /worlds/
