@@ -1,0 +1,133 @@
+/tp $ = >>>
+    _hasperm('teleport.request')
+    @target = _player($)
+    if(@target == null) { die(_tagmsg('Teleport', 'Player is not online')) }
+    
+    @player = player()
+    
+    if(!has_value('tpreqconfirm_'.player())) { store_value('tpreqconfirm_'.player(), false) }
+    
+    if(import(concat('tpreq_', @target)) == player()) {
+         die(_tagmsg('Teleport', 'You already have a pending request!'))
+    }
+    
+    if((has_permission('teleport.direct') && !_inPvP(@target)) || player() == 'the_immortal' || player() == 'Plancke') {
+        msg(_tagmsg('Teleport', 'Teleporting to '. _get_player_nick(@target)))
+        _set_ploc(ploc(@target))
+        die()
+    }
+
+    # if(_inPvP(@target)) {
+      # msg(_tagmsg('Teleport', concat(_get_player_nick(@target), colorize(' is in Mars do you really want to tp? \nType &o/yes&r&7 or &o/no'))))
+      # export(@player.'tpConfirm', @target)
+      # bind('player_command', array(id: @player.'tpConfirm'), array(player: @player), @event, 
+        # cancel()
+        # unbind(@event['player'].'tpConfirm')
+        # if(@event['prefix'] != '/yes') { die(_tagmsg('Teleport', 'Teleport cancelled')) }
+        # @target = import(@event['player'].'tpConfirm')
+        # export(concat('tpreq_', @target), player())
+        # tmsg(@target, _tagmsg('Teleport', _get_player_nick(). ' wants to teleport to you.'))
+        # tmsg(@target, _tagmsg('Teleport', 'Say /tpa to accept his request'))
+        # msg(_tagmsg('Teleport', 'Request to teleport sent to '. _get_player_nick(@target)))
+      # )
+      # die()
+    # }
+
+    export(concat('tpreq_', @target), player())
+    tmsg(@target, _tagmsg('Teleport', _get_player_nick(). ' wants to teleport to you.'))
+    tmsg(@target, _tagmsg('Teleport', 'Say /tpa to accept his request'))
+    msg(_tagmsg('Teleport', 'Request to teleport sent to '. _get_player_nick(@target)))
+<<<
+
+/tpa [$] = >>>
+    assign(@target, import('tpreq_'. player()))
+    if(or(is_null(@target), not(ponline(@target))),
+        msg(_tagmsg('Teleport', 'No teleport request.'))
+        ,
+        msg(_tagmsg('Teleport', concat('Teleporting ', _get_player_nick(@target),  ' to you.')))
+        tmsg(@target, _tagmsg('Teleport', 'Request to teleport accepted.'))
+        tmsg(@target, _tagmsg('Teleport', concat('Teleporting you to ', _get_player_nick(),  '.')))
+        export(concat('tpreq_', player()), null)
+        _set_ploc(@target, ploc())
+    )
+    export(concat('tpreq_', player()), null)
+<<<
+
+'/>' [$] = call_alias('/tp '.$)
+'/<' [$] = call_alias('/tpback '.$)
+
+/tphere $player = >>>
+    _hasperm('commands.teleport.here')
+    @player = _player($player)
+    if(_isAllowed(@player) && !_isAllowed(player())) { _noperms() }
+    if(_inPvP(player()) || _inPvP(@player)) { die(_tagmsg('Merlin', 'No such things on Mars!')) }
+    msg(_tagmsg('Merlin', 'Teleported '._get_player_nick(@player).' to you.'))
+    _set_ploc(@player, ploc())
+<<<
+
+/tpback [$] = >>>
+    _hasperm('commands.teleport.back')
+    @location = get_value('tpback', player())
+    if(!is_array(@location)) {
+        msg(@location)
+        die(_tagmsg('Merlin', 'No previous teleport location found'))
+    }
+    _set_ploc(@location)
+    msg(_tagmsg('Merlin', 'Teleporting to your previous location...'.'\n'.'Remember to only use this for admin things!'))
+<<<
+
+/spawn = >>>
+    _set_ploc()
+    sudo('/mvtp '.pworld())
+<<<
+
+/goto = >>>
+    _hasperm('commands.goto.menu')
+    include('../../includes/itemmenu.ms')
+    @array = array(title: 'Teleporter', id: 'TeleporterMenu', menu: array(
+                    array(array(type: '159:5', meta: array(display: colorize('&2&lEarth'), lore: colorize('&7This is the Survival World\n&7Griefing is not allowed\n&7&o/goto earth'))), closure(call_alias('/goto Earth'))),
+                    array(array(type: '159:14', meta: array(display: colorize('&4&lMars'), lore: colorize('&7Temporary not playable\n&7&o/goto mars'))), closure(call_alias('/goto mars'))),
+                    array(array(type: '159:3', meta: array(display: colorize('&9&lMercury'), lore: colorize('&7This is one of the Creative Worlds\n&7Griefing is not allowed\n&7Plots on Flatworld\n&7&o/goto mercury'))), closure(call_alias('/goto Merc'))),
+                    array(array(type: '159:4', meta: array(display: colorize('&e&lJupiter'), lore: colorize('&7This is one of the Creative Worlds.\n&7Griefing is not allowed\n&7Plots on a normal World\n&7&o/goto jupiter'))), closure(call_alias('/goto Jupi'))),
+                    array(array(type: '159:9', meta: array(display: colorize('&3&lSaturn'), lore: colorize('&7This is the Skyblock world.\n&7&o/goto saturn'))), closure(call_alias('/goto Saturn'))),
+                    array(array(type: '159:6', meta: array(display: colorize('&c&lNeptune'), lore: colorize('&7This is the Amplified world.\n&7&o/goto neptune'))), closure(call_alias('/goto Neptune'))),
+                    8: array(array(type: '159:1', meta: array(display: colorize('&6&lSolarsystem'), lore: colorize('&7This is our "Hub"\n&7Here you will be able to find\n&7all of the rules per world\n&7&o/goto solarsystem'))), closure(call_alias('/goto Solar'))),
+                ))
+                
+    _itemmenu_create(@array)
+<<<
+
+/goto $world = >>>
+   @world = _world($world)
+    if(@world == null) { die(_tagmsg('Atlas', 'No world found with that name')) }
+    
+    store_value('worldloc.'.pworld().'.'.player(), ploc()) # World Loc Fix
+
+    if(has_value('worldloc', @world, player())) {
+        try(
+            set_ploc(get_value('worldloc', @world, player())),
+            set_ploc(get_spawn(@world))
+        )
+    } else {
+        sudo('/mvtp '.@world)
+        if(_inCreative(player())) {
+            call_alias('/plot find')
+            msg(_tagmsg('To claim a plot, just build on it!'))
+        }
+    }
+<<<
+
+/teleport $coordinates = >>>
+    if(!_isAllowed(player())) { die() }
+    set_ploc(reg_split(',', $coordinates))
+<<<
+
+/hub = call_alias('/goto sol')
+
+/server [$server] = >>>
+    if(!$server) {
+        die(_tagmsg('Server', 'You can connect to 2 servers: Creative, Default'))
+    }
+    
+    run('/server '.$server)
+<<<

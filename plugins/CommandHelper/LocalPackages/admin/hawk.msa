@@ -1,0 +1,27 @@
+######################################################
+## Simple rollbacking commands. not confirm if they work.
+###################################################### 
+/inspector = >>>
+  _hasperm('rollback.inspector')
+  run('/hawk tool')
+<<<
+
+/rollback $player = >>>
+  _hasperm('rollback.normal')
+  run('/hawk rollback r:20 p:'.$player)
+<<<
+
+/massrollback $player = >>>
+  _hasperm('rollback.mass')
+  run('/hawk rollback r:50 p:'. $player)
+<<<
+
+/totalrollback $player = >>>
+  _hasperm('rollback.total')
+  run('/hawk rollback p: '.$player)
+  call_alias('/ban '.$player.' grief')
+<<<
+
+/hawk tool = die(_tagmsg('Guardian', 'Use \'/inspector\''))
+
+/hawk [$] = msg(_tagmsg('Guardian', 'Use \'/rollback <player>\''))

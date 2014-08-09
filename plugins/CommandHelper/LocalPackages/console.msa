@@ -1,0 +1,15 @@
+/say $ = >>>
+    if(!_isAllowed(player())) { die() }
+
+    if(get_value('nickConsole') == null || get_value('nickConsole') == '') { store_value('nickConsole', 'Console') }
+    broadcast(_tagmsg(get_value('nickConsole'), $))
+    console('Console Message: '.player())
+<<<
+
+/consolenick $name = call_alias('/nickconsole '.$name)
+/nickconsole $name = >>> 
+    if(!_isAllowed(player())) { die(_tagmsg('Vortex', 'Only run this from the console')) }
+
+    store_value('nickConsole', $name)
+    msg(_tagmsg('Vortex', 'Console nick set to '.$name))
+<<<

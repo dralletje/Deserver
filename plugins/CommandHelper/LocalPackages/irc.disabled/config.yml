@@ -1,0 +1,369 @@
+color:
+  - {irc: 0, game: "0"}
+  - {irc: 2, game: "1"}
+  - {irc: 3, game: "2"}
+  - {irc: 10, game: "3"}
+  - {irc: 5, game: "4"}
+  - {irc: 6, game: "5"}
+  - {irc: 7, game: "6",}
+  - {irc: 15, game: "7"}
+  - {irc: 14, game: "8"}
+  - {irc: 12, game: "9"}
+  - {irc: 9, game: "a"}
+  - {irc: 11, game: "b"}
+  - {irc: 4, game: "c"}
+  - {irc: 13, game: "d"}
+  - {irc: 8, game: "e"}
+  - {irc: 1, game: "f"}
+settings:
+
+  #These tags identify built-in endpoints (for the paths: section). Other endpoints may be provided by plugins.
+  minecraft-tag: 'minecraft'  #A basic game-side endpoint (a chat plugin may provide better functionality).
+  cancelled-tag: 'canceled'   #Cancelled chat is sent here. Give this tag a name only if you disable either auto-paths or minecraft-tag
+  console-tag: 'console'      #The minecraft server console.
+  
+  #Automatically establish paths between unsecured communication endpoints. Turn off if you always want to configure every path manually.
+  #(Secured endpoints can still send messages through auto-paths, but not receive them)
+  auto-paths: true
+  
+  #Paths between endpoints within the same group are not established. These groups will be created automatically (set to '' to disable):
+  #*For the three endpoints above 
+  minecraft-group-name: 'minecraft'
+  #*For all your IRC endpoints
+  irc-group-name: 'irc'
+  
+  #Here you can define custom tag groups.
+  tag-groups:
+  #  group-name:
+  #    - tagname
+  #    - ...
+  
+  #Set this to true to have CraftIRC cancel all minecraft chat if no other plugin is doing it.
+  cancel-chat: false
+  
+  #IRC commands start with this, for example '.players' (it's not part of the command name though)
+  command-prefix: '.'
+  
+  #Use different words for IRC commands
+  irc-commands:
+    say: ['say']
+    players: ['players']
+    cmd: ['cmd','c']
+    kick: ['kick']
+    ban: ['ban']
+    stop: ['stop']
+
+  #Output a LOT of crap to the console in case you're having problems or are a plugin developer.
+  debug: true
+  
+  #Console commands that can be called by an admin using .cmd/.c in an admin channel
+  console-commands: ['runalias', 'save-all', 'ban', 'stop', 'mvwho', 'mvlist', 'op', 'deop', 'ircreload']
+  
+  #Delay before allowing these event types to be relayed (prevent startup flood)
+  hold-after-enable: {chat: 0, joins: 0, quits: 0, kicks: 0, bans: 0}
+  
+  #How long in seconds before attempting a reconnect/rejoin when a connection/join fails.
+  retry-delay: 10
+  
+  #Bind to a specific IP address in your server.
+  #bind-address: 127.0.0.1
+  
+  #Default formatting templates used in all messages. Plugins may require you to add more.
+  formatting:
+    #### VARIABLES AND COLORS (from colormap): %name% (as in %message% or %yellow%). Different events provide different variables.
+    #### IRC FORMATTING: %b% %u% %r% %o% %k% %kNUM% (NUM is 0 to 15); Do the same as CTRL+key in mIRC (%o% uses'foreground')
+    
+    #==========Classic formatting==========
+    from-game:
+      chat: '%world% %prefix%%sender%: %grey%%message%'
+      private: '%sender%: %grey%%message%'
+      action: '%sender% %grey%%message%'
+      join: '== %sender% Joined Deserver! =='
+      quit: '== %sender% Left Deserver! =='
+      kick: '== %moderator% Kicked %sender% (%message%) =='
+      admin: '%sender% to online admins ->- %message%'
+      generic: '%grey%%message%'
+      say: '%purple%[Console] %grey%%message%'
+    from-irc:
+      chat: '%grey%[%darkgreen%Webchat%grey%] %foreground%%ircPrefix%%sender%:%foreground% %message%'
+      private: '%grey%[%darkgreen%Webchat%grey%] %foreground%%grey% %foreground%%ircPrefix%%sender% whispers -> %message%'
+      action: '%grey%[%darkgreen%Webchat%grey%] %foreground%%grey%* %foreground%%ircPrefix%%sender%:%foreground% %message%'
+      join: '%grey%[%darkgreen%Webchat%grey%] %foreground%%sender% Joined the Deserver Webchat Channel!'
+      part: '%grey%[%darkgreen%Webchat%grey%] %foreground%%sender% Parts the Webchat.'
+      quit: '%grey%[%darkgreen%Webchat%grey%] %foreground%%sender% Quits the Webchat (%message%).'
+      kick: '%grey%[%darkgreen%Webchat%grey%] %foreground%%sender% was kicked by %moderator% (%message%)'
+      nick: '%grey%[%darkgreen%Webchat%grey%] %foreground%%sender% is now known as %message%'
+    from-plain:
+    #======================================
+    
+    #==========Colorful formatting=========
+    #from-game:
+    #  chat: '<%prefix%%sender%%suffix%%o%> %message%'
+    #  private: '%prefix%%sender%%suffix%%o% whispers> %message%'
+    #  action: '%purple%* %prefix%%sender%%suffix%%purple% %message%'
+    #  join: '%darkgrey%[%sender% connected]'
+    #  quit: '%darkgrey%[%sender% disconnected]'
+    #  kick: '%red%[%sender% was KICKED (%message%)]'
+    #  generic: '%darkgrey%%message%'
+    #  admin: '%prefix%%sender%%suffix% to online admins> %message%'
+    #from-irc:
+    #  chat: '%grey%[%srcChannel%]%foreground% <%ircPrefix%%sender%> %message%'
+    #  private: '%grey%[IRC]%foreground% %sender% whispers> %message%'
+    #  action: '%grey%[%srcChannel%]%purple% * %ircPrefix%%sender% %message%'
+    #  join: '%grey%[%srcChannel%]%darkgreen% * Joins: %sender%'
+    #  part: '%grey%[%srcChannel%]%darkgreen% * Parts: %sender%'
+    #  quit: '%grey%[%srcChannel%]%blue% * Quits: %sender%'
+    #  kick: '%grey%[%srcChannel%]%darkgreen% * %sender% was kicked by %ircModPrefix%%moderator%'
+    #  nick: '%grey%[%srcChannel%]%darkgreen% * %sender% is now known as %message%'
+    #  generic: '%grey%%message%'
+    #======================================
+
+
+# ******************* IRC BOTS/SERVERS AND CHANNELS ******************* [CHANGES REQUIRED]
+# Every bot connects to one IRC server and can contain any amount of channels.
+# Every channel is a communication endpoint.
+bots:
+
+  - nickname: 'Deserver'
+    server: 'irc.deserver.tk'
+    port: 6667
+    userident: 'IRCBot'              #Username/ident, anything you want
+    serverpass: ''                #This isn't the nickserv password
+    ssl: false
+    
+    #Prevent flood by setting a delay (in ms) between messages to IRC and a maximum queue size.
+    message-delay: 100
+    queue-size: 5
+    
+    #Who's considered an admin within a channel?
+    admin-prefixes: ['@', '~', '&']
+    
+    #Ignore a user by nickname in this server. For greater flexibility use path filters (see further below).
+    ignored-users: []
+    
+    #If the bot's nickname is registered, put the authentication info here.
+    auth:
+      method: 'nickserv' #Available methods: 'none', 'nickserv', 'gamesurge', 'quakenet'
+      password: '102188'
+    #Send raw IRC commands to the server every time I connect.  
+    on-connect:
+    # - 'MSG NickServ identify 102188'
+    
+    ## Channels for this bot to join. ##
+    channels:
+    
+      - name: '#Deserver'
+        password: ''
+        tag: 'Deserver'
+        on-join:
+        - "PRIVMSG #deserver : I'm aliiive!"
+      # - name: '#DeserverMainStaff'
+        # password: ''
+        # tag: 'DeserverStaff'
+        # on-join:
+        # - 'PRIVMSG #deserver : I am Alliiiiivvvvee!'
+        
+      #- name: '#anotherchannel'
+      #  ...
+      
+    #Define here alternative display names for users of your IRC channels (useful if you want anonymous admins).
+    #To override these in a formatting string use %realSender%.
+    irc-nickname-map:
+      the_immortal: Immortal
+      dral: Immortal
+      AdamW: Adam
+      Grimlock257: Adam
+      Plancke: Plancke
+      bu11etspread: Bu11et
+      Pebbe19: Pebbe19
+      Pebbe19_: Pebbe19
+      Pebbe19__: Pebbe19
+      Hotnelf: Hotnelf
+      Tatara88: Tatara88
+      Boatzy: Boat
+      zubby: Zub
+      zub: Zub
+      Sypreo: Sypreo
+      Miles: Miles
+      Deserver2: TestServerPlancke
+  
+    #Set this to true if you only want the above nicknames to be able to communicate from IRC. Everyone else will be filtered.
+    use-map-as-whitelist: false
+        
+  #- nickname: 'AnotherBot'
+  #  ...
+
+
+# ******************* COMMUNICATION PATHS *******************
+# (For most uses, only needed if settings.auto-paths is false)
+# Declare here a path for every pair of endpoints between which you want messages to flow.
+# For each path you can filter the messages sent by event type or contents.
+# Paths are one-way, so you must declare A to B and B to A if you want a two-way channel.
+paths:
+    
+  - source: 'Deserver'
+    target: 'minecraft'
+    
+  - source: 'minecraft'
+    target: 'Deserver'
+    
+  # - source: 'DeserverStaff'
+    # target: 'minecraft'
+    
+  - source: 'console'
+    target: 'Deserver'
+    
+  # - source: 'minecraft'
+    # target: 'DeserverStaff'
+    
+  # - source: 'minecraft'
+    # target: 'DeserverStaff'
+    
+  # - source: 'cancelled'
+    # target: 'DeserverStaff'
+
+  #  
+  #  #Every path can contain a list of filters. Use for swear word censorship, blocking by user, etc.
+  #  filters:
+  #    #Each filter contains regular expressions for formatting variables. This one ignores commands (.TEXT)
+  #    - message: '^\.[^ ]+'
+  #
+  #  #Every path can override the formatting strings defined in settings.formatting .
+  #  formatting:
+  #  #  chat: '[%srcChannel%] <%sender%> %message%'
+  #  #  join: '[%srcChannel%] * Joins: %sender%'
+  #    
+  #  #Every path can override the attributes block from default-attributes (see below).
+  #  #  admin: false
+  #  #  ...
+  #  
+  #  #A path can inherit missing attributes from another existing path rather than from default-attributes.
+  #  #base: {source: 'minecraft', target: 'changeme'}
+  #  
+  #  #The disable flag allows you to disable a path temporarily without removing it from the configuration file.
+  #  disable: false
+      
+  #- source: 'somewhere'
+  #  target: 'elsewhere'
+  #  ... 
+
+
+# ******************* DEFAULT PATH ATTRIBUTES ******************* [CHANGES REQUIRED]
+# If an attribute isn't defined in a path, these are used.
+# If an attribute isn't defined here either, it defaults to 'false'.
+default-attributes:
+
+  #Disables all communication paths. No message will be sent anywhere.
+  #If you don't set this to false, CraftIRC may not work!
+  disable: false
+  
+  #Every event type (they're the same as the names in settings.formatting) can be enabled or disabled here.
+  #In addition, commands (such as those handled by other plugins) may require you to define extra attributes.
+  attributes:
+  
+    chat: true
+    action: true
+    join: true
+    part: true
+    nick: false
+    quit: true
+    kick: true
+    private: true
+    command: true
+    say: true
+    generic: true
+    
+    #Admin commands and /admins! can only be sent through a path where admin is set to true
+    admin: true
+    
+    #True: Colors will be converted. False: Colors will be stripped.
+    colors: true
+
+
+# ******************* COLOR CONVERSION MAP *******************
+# Here you can assign 3-tuples with names, IRC colors and Minecraft colors.
+# You must never repeat a name, an irc color or a minecraft color in more than one 3-tuple.
+# Use %colorname% in a formatting string to have the correct color show up in the message.
+
+# ******************* REPLACEMENT FILTERS *******************
+# This section allows you to set up find and replace rules on
+# every section of every message sent by CraftIRC.
+
+# If you want to delete messages instead you should use the path filters, above.
+
+# Each filter contains regular expressions for formatting variables.
+
+# For example, you can change the prefix of IRC Channel Operators to something 
+# different by executing a replacement on the %ircPrefix% variable.
+
+# filters:
+#   ircPrefix: ['@' : 'Op ']
+
+# Or you could censor IP addresses to and from chat.
+
+# filters:
+#   message: ['(\d+\.){3}\d+' : '#.#.#.#']
+
+# When writing searches, the following characters have special meanings:
+# ^ $ . + ? * { } [ ] ( )
+# If you want to use these characters normally, escape them with a backslash \.
+# When writing the replacement, make sure you escape any $ or \ characters
+# with an additional \ unless you want to use backreferences.
+
+# Example: Changing emoticon ^_^ to $_$
+ 
+# filters:
+#   message: ['\^_\^' : '\$_\$']
+
+# To delete a search, use an empty replacement, or none at all.
+
+# This example shows two ways of deleting. The searches are xxx and yyy.
+
+# filters:
+#   message: [xxx, yyy : '']
+
+# Remember that any list can be written in two ways.
+# filters:
+#   prefix: ['mod' : 'Mod', 'adm' : 'Admin']
+
+# is equivalent to
+
+# filters:
+#   prefix:
+#   - 'mod' : 'Mod'
+#   - 'adm' : 'Admin'
+filters:
+  command: []
+  source: []
+  target: []
+  prefix: []
+  suffix: []
+  sender: []
+  realSender: []
+  message: []
+  moderator: []
+  world: 
+  - 'space' : "\u00A77[\u00A76SolarSystem\u00A77]" 
+  - 'horses' : "\u00A77[\u00A72Earth\u00A77]"
+  - 'newearth' : "\u00A77[\u00A72Earth\u00A77]"
+  - 'newpvp' : "\u00A77[\u00A74Mars\u00A77]"
+  - 'mercury' : "\u00A77[\u00A79Mercury\u00A77]"
+  - 'Dustbowl' : "\u00A77[\u00A7eTF2\u00A77]"
+  - 'tf2lobby' : "\u00A77[\u00A7eTF2\u00A77]"
+  - 'jupiter' : "\u00A77[\u00A7eJupiter\u00A77]"
+  - 'skyblock' : "\u00A77[\u00A73Saturn\u00A77]"
+  - 'pluto' : "\u00A7b[\u00A7bPluto\u00A77]"
+  - 'uhclobby' : "\u00A77[\u00A74UHCLobby\u00A77]"
+  - 'uhc' : "\u00A77[\u00A74UHC\u00A77]"
+  - 'uhc_nether' : "\u00A77[\u00A74UHCNether\u00A77]"
+  - 'uhc_the_end' : "\u00A77[\u00A74UHCEnd\u00A77]"
+  - '_nether' : ''
+  - '_the_end' : ''
+
+# IRC only variables:
+  ircPrefix: ['&' : "\u00A77[Manager]\u00A75 ", '~' : "\u00A77[Owner]\u00A75 ", '@' : "\u00A77[Owner]\u00A75 ", '\%' : "\u00A77[UberAdmin]\u00A75 ", "\\+" : "\u00A77[Admin]\u00A74 "]
+  realModerator: []
+  ircModPrefix: []
+  modUsername: []
+  modHostname: []
+  srcChannel: []

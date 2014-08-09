@@ -1,0 +1,68 @@
+/birthday $player [$amountSmoke=10] [$amountFirework=10] = call_alias('/hb '.$player.' '.$amountSmoke.' '.$amountFirework)
+/hb $player [$amountSmoke=10] [$amountFirework=10] = >>>
+    _hasperm('commands.birthday')
+    assign(@amountSmoke, $amountSmoke)
+    assign(@amountFirework, $amountFirework)
+    assign(@player, _nick($player))
+    store_value('Birthday'.@player, 1)
+    assign(@coordinates, ploc(@player))
+    assign(@x, @coordinates[0])
+    assign(@y, @coordinates[1])
+    assign(@z, @coordinates[2])
+    assign(@counter, 0)
+    assign(@interval, 500)
+    assign(@facing, pfacing(@player))
+    assign(@yaw, _calculate_nearest_degree(90, @facing[0]))
+    assign(@singles, floor(@amountSmoke*9))
+    pfacing($player, @yaw,0)
+    for(@j = 0, @j <= 1, @j++,
+        assign(@y, @y + 1)
+        for(@i = 0, @i <= @singles, @i++,
+            make_effect(array(x: @x, y: @y, z: @z), 'SMOKE:'.rand(0,9), 1)
+        )
+    )
+    if(@yaw == 90 || @yaw == 270) {
+        lightning(array(x: @x, y: @y - 2, z: @z + 3))
+        lightning(array(x: @x, y: @y - 2, z: @z - 3))
+        lightning(array(x: @x, y: @y - 2, z: @z + 3))
+        lightning(array(x: @x, y: @y - 2, z: @z - 3))
+    }
+    if(@yaw == 180 || @yaw == 0) {
+        lightning(array(x: @x + 3, y: @y - 2, z: @z))
+        lightning(array(x: @x - 3, y: @y - 2, z: @z))
+        lightning(array(x: @x + 3, y: @y - 2, z: @z))
+        lightning(array(x: @x - 3, y: @y - 2, z: @z))
+    }
+    @colors = array(
+        array(255, 0, 0),   #red
+        array(255, 128, 0), #orange
+        array(255, 255, 0), #yellow
+        array(0, 255, 0),   #green
+        array(0, 0, 255),   #blue
+        array(127, 0, 255), #indigo
+        array(102, 0, 204), #violet
+        array(255, 20, 147) #pink
+    )
+    @shapes = array(
+        'BALL_LARGE', 
+        'STAR',
+        'BURST'
+    )
+    set_interval(@interval, closure(
+        if(get_value('Birthday'.@player) <= @amountFirework) {
+            launch_firework(array(x: @x - rand(-3,3), y: @y + 1, z: @z - rand(-3,3)), array(strength: 1, flicker: false, trail: false, colors: array(@colors[rand(0,array_size(@colors))],@colors[rand(0,array_size(@colors))],@colors[rand(0,array_size(@colors))]) , fade: @colors[rand(0,array_size(@colors))], type: @shapes[rand(0,array_size(@shapes))]))
+            launch_firework(array(x: @x - rand(-3,3), y: @y + 1, z: @z - rand(-3,3)), array(strength: 1, flicker: false, trail: false, colors: array(@colors[rand(0,array_size(@colors))],@colors[rand(0,array_size(@colors))],@colors[rand(0,array_size(@colors))]) , fade: @colors[rand(0,array_size(@colors))], type: @shapes[rand(0,array_size(@shapes))]))
+            launch_firework(array(x: @x - rand(-3,3), y: @y + 1, z: @z - rand(-3,3)), array(strength: 1, flicker: false, trail: false, colors: array(@colors[rand(0,array_size(@colors))],@colors[rand(0,array_size(@colors))],@colors[rand(0,array_size(@colors))]) , fade: @colors[rand(0,array_size(@colors))], type: @shapes[rand(0,array_size(@shapes))]))
+            launch_firework(array(x: @x - rand(-3,3), y: @y + 1, z: @z - rand(-3,3)), array(strength: 1, flicker: false, trail: false, colors: array(@colors[rand(0,array_size(@colors))],@colors[rand(0,array_size(@colors))],@colors[rand(0,array_size(@colors))]) , fade: @colors[rand(0,array_size(@colors))], type: @shapes[rand(0,array_size(@shapes))]))
+            launch_firework(array(x: @x - rand(-3,3), y: @y + 1, z: @z - rand(-3,3)), array(strength: 1, flicker: false, trail: false, colors: array(@colors[rand(0,array_size(@colors))],@colors[rand(0,array_size(@colors))],@colors[rand(0,array_size(@colors))]) , fade: @colors[rand(0,array_size(@colors))], type: @shapes[rand(0,array_size(@shapes))]))
+            for(@i = 0, @i <= @singles, @i++,
+                make_effect(array(x: @x, y: @y, z: @z), 'SMOKE:'.rand(0,9), 1)
+            )
+        }
+        else {
+            clear_task()
+        }
+        store_value('Birthday'.@player, get_value('Birthday'.@player) + 1)
+    ))
+    
+<<<

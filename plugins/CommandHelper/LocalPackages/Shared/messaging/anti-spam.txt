@@ -1,0 +1,37 @@
+#############################
+## Only for trusted and below
+#############################
+if(!has_permission('rank.veteran')) {
+    assign(@lastchat, import('lastchatten'))
+    
+    if(!is_array(@lastchat) || @lastchat['player'] != player()) {
+        export('lastchatten', array(
+            'player': player(),
+            'times': 1,
+            'start': round(time()/1000),
+            'message': to_lower(@event['message'])
+        ))
+        return()
+    }
+    
+    if(to_lower(@event['message'] == @lastchat['message'])) {
+        modify_event(
+            'recipients',
+            array(player())
+        )
+    }
+    
+    if(@lastchat['times'] > 5) {
+        if( round(time()/1000) < @lastchat['start']+10 ) {
+            kick(@player, 'Chat spamming')
+        } else if( round(time()/1000) < @lastchat['start']+20 ) {
+            msg(_tagmsg('Chatter', 'Make sure you give others a change to talk too!'))
+        }
+    }
+    export('lastchatten', array(
+        'player': player(),
+        'times': @lastchat['times'] + 1,
+        'start': @lastchat['start'],
+        'message': to_lower(@event['message'])
+    ))
+}

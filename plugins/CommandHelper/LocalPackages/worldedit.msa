@@ -1,0 +1,36 @@
+######################################################
+## Sample command
+######################################################
+/do $ = run('/'.$)
+
+# Worldedit, I hate you at this point.
+/fixwater [$] = run('/fixwater '.$)
+
+/fixlava $num = >>>
+    if(!is_numeric($num)) {
+        die(_tagmsg('we', 'Use "/fixlava <radius>"'))
+    }
+    if($num > 4) {
+        pkick()
+        die()
+    }
+    run('/fixlava '.[$])
+<<<
+
+/tool [$] = >>>
+    @name = colorize('&bTool '.$)
+    set_itemmeta(null, array('display': @name))
+    run('/tool '.$)
+<<<
+
+# /next = >>>
+	# assign(@regions, sk_all_regions(pworld()))
+	# if(length(@regions) == 1) {
+		# die(_tagmsg('vortex', 'No other regions found'))
+	# }
+	
+	# assign(@region, sk_region_info(@regions[1], pworld()))
+	# msg(_tagmsg('vortex', 'Teleporting you to the region '.@regions[1]))
+	# set_ploc(player(), @region[0][0])
+# <<<
+	

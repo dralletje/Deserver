@@ -1,0 +1,97 @@
+#<?
+bind(player_chat, array(priority: high), null, @event,
+    assign(
+        @message, 
+        @event['message']
+    )
+
+    ## Set haschat to true, for the chat ban check
+    export('haschat_'.player(), true)
+
+#############################################################################
+## Things to check for everyone.
+#############################################################################
+     if(length(@message) < 2) {
+        cancel()
+        return()
+    }
+
+        if(to_lower(substr(@message, 0, 2)) == 'la') {
+            modify_event('recipients', array(player()))
+            return()
+        }
+    
+    if(!has_permission('chatter.capitals') && length(@message) > 5) {
+        assign(
+            @message, 
+            replace(
+                to_lower(
+                    substr(@event['message'], 3, length(@event['message']) - 3) 
+                ),
+                ' i ', ' I '
+            )   
+        )
+        assign(@message,
+            substr(@event['message'], 0, 3)
+            . @message
+            . substr(@event['message'], length(@event['message']) - 3,  length(@event['message']))
+        ) 
+    }
+    
+    assign(
+        @message, 
+        _capitalize(@message)
+    )
+    
+    modify_event(
+        'message',
+        @message
+    )
+    
+    assign(@lastchat, import('lastchatten'))
+    
+    if(!is_array(@lastchat) || @lastchat['player'] != player()) {
+        export('lastchatten', array(
+            'player': player(),
+            'times': 1,
+            'start': round(time()/1000),
+            'message': to_lower(@event['message'])
+        ))
+        return()
+    }
+    
+    if(to_lower(@event['message'] == @lastchat['message'])) {
+        console('Double spam');
+        modify_event(
+            'recipients',
+            array(player())
+        )
+    }
+    
+    export('lastchatten', array(
+        'player': player(),
+        'times': @lastchat['times'] + 1,
+        'start': @lastchat['start'],
+        'message': to_lower(@event['message'])
+    ))
+    
+    #############################
+    ## Only for trusted and below
+    #############################
+    if(length(all_players()) > 20){
+        assign(@maxchat, 5)
+    } else {
+        assign(@maxchat, 25 - length(all_players()))
+    }
+    
+    if(!has_permission('rank.veteran')) {
+        if(@lastchat['times'] > @maxchat) {
+            if( round(time()/1000) < @lastchat['start']+10 ) {
+                kick(@player, 'Chat spamming')
+            } else if( round(time()/1000) < @lastchat['start']+20 ) {
+                msg(_tagmsg('Chatter', 'Make sure you give others a change to talk too!'))
+            }
+        }
+    }
+)
+

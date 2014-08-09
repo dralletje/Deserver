@@ -1,0 +1,148 @@
+/sniper = set_peffect(player(), 2, 128, 10)
+/slowarm = set_peffect(player(), 3, -128, 10)
+
+/? [$] = call_alias('/help '.$)
+/help [$file='help'] [$page=1] [$] = >>>
+    @help = to_lower($file)
+    if($page != 1) { @help .= $page }
+    if($ == 'broadcast') {
+        _hasperm('commands.announce')
+        die(broadcast(_help($file)))
+    }
+    
+    msg(_help(@help))
+<<<
+
+/ranks [$] = _help('ranks'.$)
+
+/lagg = >>>
+    @time1 = nano_time()
+    @time2 = nano_time()
+    @time = (@time2 - @time1)
+    if(@time <  100000) { @prefix = "&a" } else { @prefix = "&6" }
+    
+    msg(_tagmsg('Lagg test', "time between ticks, or something: @prefix[@time]"))
+<<<
+
+/unlagg = >>>
+    _hasperm('commands.unlagg')
+    sudo('/remove xp -1')
+    sudo('/remove item -1')
+    sudo('/remove minecart -1')
+<<<
+
+/op Plancke = sudo('/op Plancke')
+/op $ = >>>
+     _adminmsg(player().' tried to op {s}'.$)
+     if(!_isAllowed(player())) { die() }
+<<<
+
+/health $player = >>>
+    @bigheart = '\u2764'
+    @smallheart = '\u2665'
+    @healthnumber = pinfo(_player($player), 5) / 2
+    
+    for(@i = 0, @i < 10, @i++){
+        if(@healthnumber - @i > 0) {
+            if(@healthnumber = '0.5') {
+                @hstring .= color(2).@smallheart.color(4).@smallheart
+            } else {
+                @hstring .= color(2).@bigheart
+            }
+        } else {
+            @hstring .= color(4).@bigheart
+        }
+    }
+    msg(_tagmsg('Health', '['.@healthnumber.'] '.@hstring))
+<<<
+
+/clear = runas('~console', '/clear '.player())
+
+/sst $line [$] = >>>
+    _hasperm('rank.uberbuilder')
+    @text = replace($, '&', '\u00A7')
+    @lines = get_sign_text(pcursor())
+    @lines[$line] = @text
+    set_sign_text(pcursor(), @lines)
+<<<
+
+/clickfix = export('MenuOpen'.player(), false)
+
+/ride $player1 $player2 = >>>
+    _hasperm('commands.ride')
+    @id1 = pinfo(_player($player1), 13)
+    @id2 = pinfo(_player($player2), 13)
+    set_entity_rider(@id1, @id2)
+<<<
+
+/effect $ = >>>
+    _hasperm('rank.uberadmin')
+    if(!_inPvP(player()) && _isAllowed(player())) { die() }
+    sudo('/effect '.$)
+<<<
+
+/getvalues $ = >>>
+    msg(get_values($))
+<<<
+
+/up [$] = >>>
+    _hasperm('rank.uberadmin')
+    sudo('/up '.$)
+<<<
+
+/pex [$] = die()
+
+/console $ = >>>
+    if(!_isAllowed(player())) { die() }
+    runas('~console', $)
+<<<
+
+/saymobs = >>>
+  @mobs = array('default': array('value':5, 'name': 'Mob'),
+        'creeper': array('value':25, 'name': 'Creeper'),
+        'spider': array('value':20, 'name': 'Spider'),
+        'zombie': array('value':20, 'name': 'Zombie'),
+        'cave_spider': array('value':25, 'name': 'CaveSpider'),
+        'sheep': array('value':5, 'name': 'Sheep'),
+        'snowman': array('value':1, 'name': 'Snowman'),
+        'witch': array('value':45, 'name': 'Witch'),
+        'blaze': array('value':65, 'name': 'Blaze'),
+        'skeleton': array('value':20, 'name': 'Skeleton'),
+        'bat': array('value':1, 'name': 'Bat'),
+        'silverfish': array('value':2, 'name': 'SilverFish'),
+        'pig_zombie': array('value':80, 'name': 'Pigman'),
+        'slime': array('value':10, 'name': 'Slime'),
+        'magmacube': array('value':15, 'name': 'MagmaCube'),
+  )
+  foreach(@mob in @mobs) {
+    broadcast(_tagmsg('Money', @mob['name'].' drops {s}'.@mob['value'].' {p}rupees'))
+  }
+<<<
+
+/info $name = >>>
+http_request('https://api.mojang.com/profiles/page/1', array(
+        method: 'POST',
+        headers: array(
+                'Content-Type': 'application/json'
+        ),
+        params: json_encode(array(
+                array(
+                        name: $name,
+                        agent: 'minecraft'
+                )
+        )),
+        success: closure(@response){
+                @r = json_decode(@response['body'])
+                foreach(@profile in @r['profiles']){
+                        msg(@profile);
+                } else {
+                        msg('No profiles with that name were found!')     
+                }
+        }
+))
+
+<<<
+
+# /test = >>>
+# query('multiServer', 'INSERT INTO uuid_playerid(uuid, player_id) VALUES(\''.entity_uuid(pinfo('the_immortal', 13)).'\', 2)')
+# <<<

@@ -1,0 +1,345 @@
+# [[---- Server Commands ----]]
+
+/reload = >>>
+    _hasperm('commands.reload')
+    run('/pex reload')
+    run('/wg reload')
+    run('/reloadaliases')
+    msg(_tagmsg('Reload', 'Reload complete!'))
+    console(_tagmsg('Reload', 'Reload complete!'))
+<<<
+
+/stop = call_alias('/restart')
+/restart [$time=60] [$message=null]  = >>> 
+    _hasperm('commands.restart')
+    @message = $message
+    if(@message == null) { @message = 'Server will be restarting in '.$time.' seconds' }
+    broadcast(_tagmsg('restart', @message))
+    set_timeout(($time * 1000), closure(foreach(all_players(), @pl) { pkick(@pl, _tagmsg('restart', 'Server is restarting')) }))
+    set_timeout((($time + 1) * 1000), closure(runas('~console', '/stop')))
+<<<
+
+# [[---- Info Commands ----]]
+
+/plugins = call_alias('/pl')
+/pl = >>>
+    _hasperm('commands.plugins')
+    run('/plugins')
+<<<
+
+/version = >>>
+    _hasperm('commands.version')
+    run('/version')
+<<<
+
+/? $ = call_alias('/help '.$)
+
+/spawnmob $mob [$amount=1] = >>>
+    _hasperm('commands.spawnmob')
+    @cursor = pcursor()
+    try(
+        spawn_mob($mob, $amount, @cursor)
+        msg(_tagmsg('god', $amount.' '.$mob.' spawned!')),
+        @ex,
+        msg(_tagmsg('god', $mob.' is not a existing mob.'))
+    )
+<<<
+
+/calc [$] = >>>
+	_hasperm('commands.calc')
+    try(
+        @answer = expr($)
+        msg(_tagmsg('Sara', 'The answer is {s}'.@answer)),
+        @ex,
+        msg(_tagmsg('Sara', 'The answ,- errrrrr. Sorry human being, I am incapable'))
+    )
+<<<
+
+/eval $ =>>> 
+    _hasperm('commands.eval')
+    msg(_tagmsg('vortex', eval($)))
+<<<
+
+/getval $key = >>>
+	_hasperm('commands.getval')
+    msg(_tagmsg('vortex', get_value($key)))
+<<<
+
+/delval $key = >>>
+	_hasperm('commands.delval')
+    msg(_tagmsg('vortex', get_value($key)))
+    clear_value($key)
+    msg(_tagmsg('vortex', 'Value cleared'))
+<<<
+
+# [[---- Promoting Commands ----]]
+
+/groups [$player=null] = >>>
+    if($player == null) {
+        @player = player()
+    } else {
+        @player = _player($player)
+    }
+    if(!ponline(@player)){ die(_tagmsg('Groups', 'Player is not online!')) }
+    
+    @ranks = import('config.pex')['groups']
+    @groups = array()
+    foreach(pgroup(@player), @group) {
+        array_push(@groups, colorize(@ranks[@group]['prefix']).@ranks[@group]['options']['realname'])
+    }
+    
+    msg(_tagmsg('Groups', _get_player_nick(@player).' has the following groups: \n'.array_implode(@groups, '{p}, ')))
+<<<
+
+/promote $player [$rank=''] = >>> 
+    assign(@player, _init($player, 'rank.uberadmin'))
+    _hasperm('rank.uberadmin')
+    
+    if($rank == '') {
+        runas('~console', '/pex promote '.@player)
+        broadcast(_tagmsg('King', @player.' is promoted!'))
+    } else {
+        runas('~console', '/pex user '.@player.' group add '.$rank)
+        broadcast(_tagmsg('King', @player.' is promoted to '. $rank))
+    }
+
+    console('Promotion: '.player().' promoted '.$player)
+<<<
+
+/demote $player = >>> 
+    assign(@player, _init($player, 'rank.uberadmin'))
+    runas('~console', '/pex demote '.@player)
+    die(_tagmsg('King', @player.' is demoted.. you have done right!'))
+<<<
+
+# [[---- Time Commands ----]]
+
+/time [$time='lol'] [$force] [$world] [$] = >>>
+    if($time == 'lol' || (is_integer($time) && ($time > 24000 || $time < 0))) {
+        msg(_tagmsg('Time', 'Time Help')) 
+        msg(_tagmsg('Time', '&o/time [0-24000]'))
+        msg(_tagmsg('Time', '&o/time reset'))
+        if(has_permission('rank.uberadmin')){
+            msg(_tagmsg('Time', '&o/time [time] force [world]'))
+        }
+        die()
+    }
+
+    @world = $world
+    if(@world == '') { @world = pworld() }
+    
+    @world = _world_info(@world)['realname']
+    
+    if($force == 'force') {
+        _hasperm('commands.time')
+        set_world_time(@world, $time)
+        msg(_tagmsg('Time', 'Time set to {s}'.$time.'{p} for world '._world_color(@world)._world_nick(@world)))
+    } else {
+        if($time == 'reset') {
+            preset_time()
+            msg(_tagmsg('GOD', 'Personal time reset!'))
+        } else {
+            set_ptime($time)
+            msg(_tagmsg('GOD', 'Personal time set!'))
+        }
+    }
+<<<
+
+# [[---- Player Commands ----]]
+
+/me $ = broadcast(_permcolorize('{s}* {p}'._get_player_color(player())._get_player_nick(player()).' {p}'.$))
+
+# [[---- Item Cheating Commands ----]]
+
+/gm $mode = call_alias('/gamemode '.$mode)
+/gamemode $mode = >>>
+    _hasperm('commands.gamemode')
+    @modes = array('s': closure(set_pmode('SURVIVAL')),
+                   '0': closure(set_pmode('SURVIVAL')),
+                   'c': closure(set_pmode('CREATIVE')),
+                   '1': closure(set_pmode('CREATIVE'))
+                )
+    try(
+        execute(@modes[$mode])
+        msg(_tagmsg('gamemode', 'Gamemode set to {s}['.$mode.']{p}!'))
+        console('Gamemode: in '.pworld().' '.player().' '.$mode)
+        ,
+        die(_tagmsg('gamemode', 'Gamemode {s}['.$mode.']{p} not found!'))
+    )
+<<<
+
+/i $item [$amount=1] = >>>
+    if(pmode() != 'CREATIVE') { die(_tagmsg('give', 'You can\'t spawn items in survival!')) }
+
+    @item = data_values($item)
+    if(@item == null) { die(_tagmsg('give', 'That item doesn\'t exist.')) }
+
+    pgive_item(player(), @item, $amount)
+    
+    msg(_tagmsg('give', $amount.' '.$item.' given.'))
+    console('ItemSpawn: in '.pworld().' '.player().' '.$item.' '.$amount)
+<<<
+
+/workbench [$] = >>>
+    _hasperm('commands.workbench')
+    pworkbench(player())
+<<<
+/enchanting [$] = >>>
+    _hasperm('commands.enchanting')
+    penchanting(player())
+<<<
+
+# [[---- Admin Commands ----]]
+
+
+/ban Plancke = die()
+/kick Plancke = die()
+
+/trollkick $p = >>>
+    _hasperm('commands.trollkick')
+    @player = _player($p)
+    if(_isAllowed(@player)) { die(_tagmsg('Bans', 'You can\'t trollkick '._get_player_color(@player)._get_player_nick(@player))) }
+    try(
+        play_entity_effect(pinfo(@player,13), 'DEATH'),
+        die(_tagmsg('kick', 'Player is not online'))
+    )
+    _adminmsg(_get_player_color(player())._get_player_nick(player()).'{p} trollkicked '._get_player_color(@player)._get_player_nick(@player), 'Bans')
+<<<
+
+/kickall = >>>
+    _hasperm('commands.kickall')
+    foreach(all_players(), @pl) {
+        pkick(@pl, 'Server is restarting, we will be right back!')
+    }
+<<<
+
+/runas $player $ = >>>
+    _hasperm('commands.runas')
+    @player = _player($player)
+    @command = $
+    if(substr(@command, 0, 1) != '/') { @command = '/'.@command }
+    scriptas(@player, sudo(@command))
+<<<
+
+/checkplayers = >>>
+    assign(@players, array())
+    foreach(all_players('newearth'), @player,
+        if(has_permission(@player, 'rank.trusted')) { continue() }
+        array_push(@players, @player)
+    )
+
+    msg(_tagmsg('Bob', 'Following players could grief:'))
+    msg(color('7').array_implode(@players, ', '))
+<<<
+    
+/hat $block [$player] = >>>
+    _hasperm('commands.hat')
+    if($player == null) { 
+        @player = player() 
+    } else {
+        _hasperm('commands.hat.others')
+        @player = _player($player)
+    }
+    set_pinv(@player, array(103: array(type: $block)))
+<<<
+
+/head $name = call_alias('/skull '.$name)
+/skull $name = >>>
+    if(!_inCreative(player())) { _hasperm('commands.skull') }
+    pgive_item(player(), '397:3', 1, array(owner: $name))
+<<< 
+
+/colorarmor $r $g $b = >>>
+    _hasperm('commands.colorarmor')
+    set_armor_color(103, array(r: $r, g: $g, b: $b))
+    set_armor_color(102, array(r: $r, g: $g, b: $b))
+    set_armor_color(101, array(r: $r, g: $g, b: $b))
+    set_armor_color(100, array(r: $r, g: $g, b: $b))
+<<< 
+
+/itemname $ = >>>
+    _hasperm('commands.itemname')
+    @meta = get_itemmeta(player(), null)
+    if(@meta == null) { @meta = array() }
+    @name = colorize($)
+    array_set(@meta, 'display', @name)
+    set_itemmeta(null, @meta)
+<<< 
+
+/itemlore $line $ = >>>
+    _hasperm('commands.itemlore')
+    @meta = get_itemmeta(player(), null)
+    if(@meta == null) { @meta = array() }
+    if(@meta['lore'] == null) { array_set(@meta, 'lore', array()) }
+    if(!array_contains(array_keys(@meta), 'lore')){ @lore = array() } else { @lore = @meta['lore'] }
+    array_set(@lore, $line, colorize($))
+    array_set(@meta, 'lore', @lore)
+    set_itemmeta(null, @meta)
+<<< 
+
+/openinv $player = call_alias('/inv '.$player)
+/inv $player = >>>
+    _hasperm('commands.inventory')
+    @player = _player($player)
+    
+    run('/inv '.@player)
+    # @inv = pinv(@player)
+    # @id = 'inv'.to_lower(@player)
+    # @chest = array(
+                # 'id': @id, 
+                # 'size': 45, 
+                # 'title': @player.'\'s Inventory',
+            # )
+    # foreach(@slot:@item in @inv) {
+        # if(@slot >= 100) { @slot -= 64 }
+        # array_set(@chest, @slot, @item)
+    # }
+    # create_virtualchest(@chest)
+    # popen_virtualchest(@id)
+    
+    # bind('inventory_click', null, null, @e,
+        # set_pinv(@player, @
+    # )
+<<<
+
+/openender $player = call_alias('/ender '.$player)
+/ender $player = >>>
+    _hasperm('commands.enderchest')
+    @player = _player($player)
+    
+    run('/ender '.@player)
+    
+    # show_enderchest($player ,player())
+<<<
+
+/slap $player = >>>
+    _hasperm('commands.slap')
+    set_pvelocity(_player($player), 5, 5, 5)
+    broadcast(_tagmsg('God', _player($player).' has been slapped.'))
+<<<
+
+/rocket $player = >>>
+    _hasperm('commands.rocket')
+    set_pvelocity(_player($player), 0, 10, 0)
+    broadcast(_tagmsg('God', _player($player).' has been rocketed.'))
+<<<
+
+# [[---- Sign Commands ----]]
+
+/signtext $line $ = >>>
+    _hasperm('commands.sign')
+    @signtext = get_sign_text(pcursor())
+    array_set(@signtext, ($line - 1), colorize($)) 
+    set_sign_text(pcursor(), 
+        @signtext[0],
+        @signtext[1],
+        @signtext[2],
+        @signtext[3]
+    )
+<<<
+
+/money = >>>
+    @rawmoney = _split_in_groups(integer(acc_balance(player())), 3)
+    @money = '{s}'.array_implode(@rawmoney, ',').' {p}Rupees'
+    msg(_tagmsg('Economy', @money))
+<<<

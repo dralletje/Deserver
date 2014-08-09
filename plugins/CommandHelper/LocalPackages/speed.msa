@@ -1,0 +1,15 @@
+/flyspeed $speed = >>>
+    #_hasperm('rank.vip', 'vip')
+    if(($speed > 80 || $speed < 0 ) && !_isAllowed(player())) { die(_tagmsg('flyspeed', 'Cannot set Speed to {s}'.$speed))}
+    @speed = $speed / 100
+    set_pflyspeed(@speed)
+    msg(_tagmsg('flyspeed', 'Speed set to {s}'.$speed.'{p}!'))
+<<<
+
+/walkspeed $speed = >>>
+    _hasperm('rank.owner', 'owner')
+    if(($speed > 80 || $speed < 0 ) && !_isAllowed(player())) { die(_tagmsg('walkspeed', 'Cannot set Speed to {s}'.$speed))}
+    @speed = $speed / 100
+    set_pwalkspeed(@speed)
+    msg(_tagmsg('flyspeed', 'Speed set to {s}'.$speed.'{p}!'))
+<<<

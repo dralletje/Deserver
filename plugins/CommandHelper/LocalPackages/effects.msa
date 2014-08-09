@@ -1,0 +1,46 @@
+/thisisawesome [$name=''] = >>>
+assign(@player, _effect($name, 'thisisawesome'))
+set_peffect(@player, 9, 20, 20)
+<<<
+
+/herobrine [$name=''] =  >>>
+_hasperm('effect.herobrine')
+if($name == '') { @name = player() } else { @name = _player($name) }
+assign(@tempplayer, @name)
+set_peffect(@tempplayer, 1, 10 ,500)
+set_peffect(@tempplayer, 3, 100 ,500)
+set_peffect(@tempplayer, 5, 100 ,500)
+set_peffect(@tempplayer, 6, 100 ,500)
+set_peffect(@tempplayer, 8, 10 ,500)
+set_peffect(@tempplayer, 10, 100 ,500)
+set_peffect(@tempplayer, 11, 100 ,500)
+set_peffect(@tempplayer, 12, 100 ,500)
+set_peffect(@tempplayer, 13, 100 ,500)
+set_peffect(@tempplayer, 16, 100 ,500)
+        
+msg(_tagmsg('Herobrine', 'You gave the powers of the Herobrine to '. _nick(@tempplayer)))
+tmsg(@tempplayer, _tagmsg('Herobrine', 'You have been imbued with Herobrine\'s powers by '. _nick(player())))
+<<<
+
+/moreeffect [$name=''] = >>>
+    _hasperm('effect.moreefect')
+    if($name == '') { @name = player() } else { @name = _player($name) }
+    assign(@tempplayer, @name)
+    set_peffect(@tempplayer, 8, 50 ,94)
+    msg(_tagmsg('Herobrine', 'You gave the powers of the jumper to '. _nick(@tempplayer)))
+    tmsg(@tempplayer, _tagmsg('Herobrine', 'You have been imbued with jumper\'s powers by '. _nick(player())))
+<<<
+/blindness [$name=''] = >>>
+    _hasperm('effect.blindness')
+        if($name == '') { @name = player() } else { @name = _player($name) }
+    assign(@tempplayer, @name)
+    set_peffect(@tempplayer, 15, 100 ,100)
+    msg(_tagmsg('Herobrine', 'You blinded '. _nick(@tempplayer)))
+    tmsg(@tempplayer, _tagmsg('Herobrine', 'You were blinded by '. _nick(player())))
+<<<
+
+/secretcommand $player = >>>
+@player = _player($player)
+tmsg(@player, _tagmsg('Herobrine', 'Your arms transformed into wings!'))
+set_pflight(@player, true)
+<<<

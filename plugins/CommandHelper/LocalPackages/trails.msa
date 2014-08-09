@@ -1,0 +1,207 @@
+# <?
+/fw toggle [$player] [$anim] = >>>
+    _hasperm('rank.owner')
+    @player = $player
+    if(!$player) { @player = player() }
+
+    @interval = 1  #in msecs
+    @radius = 3
+
+    @colors = array(
+        array(255, 0, 0),   #red
+        array(255, 128, 0), #orange
+        array(255, 255, 0), #yellow
+        array(0, 255, 0),   #green
+        array(0, 0, 255),   #blue
+        array(127, 0, 255), #indigo
+        array(102, 0, 204), #violet
+        array(255, 20, 147) #pink
+    )
+    @shapes = array(
+        'BALL_LARGE',
+        'STAR',
+        'BURST'
+    )
+
+    if(import('firework.toggle.'.@player) == null) { export('firework.toggle.'.@player, false) }
+    if(import('firework.toggle.'.@player) == true) {
+        export('firework.toggle.'.@player, false)
+        msg('DISABLED')
+    } else {
+        export('firework.toggle.'.@player, true)
+        @id = set_interval(@interval, closure(
+            if(!ponline(@player)) { clear_task() }
+            if(import('firework.toggle.'.@player) == false) { clear_task() }
+            @coordinates = ploc(@player)
+            @coordinates['y'] = @coordinates['y'] + 1
+
+            play_effect(@coordinates, $anim)
+        ))
+        msg('ENABLED')
+    }
+<<<
+
+/trail toggle [$player] [$r] = >>>
+    _hasperm('rank.owner')
+    @interval = 100
+
+    if(import('trail.toggle.'.@player) == null) { export('trail.toggle.'.@player, false) }
+    if(import('trail.toggle.'.@player) == true) {
+        export('trail.toggle.'.@player, false)
+        msg('DISABLED')
+    } else {
+        export('trail.toggle.'.@player, true)
+        
+        @options = array(
+                  offsetX: 0, 
+                  offsetY: 0, 
+                  offsetZ: 0, 
+                  particleCount: 1, 
+                )
+        @radius = $r
+        @anglestep = (6.28 / $r / 15)
+        
+        @id = set_interval(@interval, closure(
+            if(!ponline(@player)) { clear_task() }
+            if(import('trail.toggle.'.@player) == false) { clear_task() }
+            
+            if(import('trail.angle.'.@player) == null) { export('trail.angle.'.@player, 0) }
+            @angle = import('trail.angle.'.@player)
+                
+            if(@angle >= 6.28) { @angle = 0 }
+            
+            @ploc = ploc($player)
+            @x = @ploc[x]
+            @z = @ploc[z]
+            @x = @radius * cos(@angle) + @ploc[x]
+            @z = @radius * sin(@angle) + @ploc[z]
+     
+            play_effect(array(x: @x, z: @z, y: @ploc[y] + 3, world: @ploc[world]), 'NOTE', @options)
+            @angle += @anglestep
+            export('trail.angle.'.@player, @angle)
+            
+        ))
+        msg('ENABLED')
+    }
+<<<
+
+/trail2 toggle [$player] [$r] = >>>
+    _hasperm('rank.owner')
+    @interval = 100
+
+    if(import('trail.toggle.'.@player) == null) { export('trail.toggle.'.@player, false) }
+    if(import('trail.toggle.'.@player) == true) {
+        export('trail.toggle.'.@player, false)
+        msg('DISABLED')
+    } else {
+        export('trail.toggle.'.@player, true)
+        @id = set_interval(@interval, closure(
+            if(!ponline(@player)) { clear_task() }
+            if(import('trail.toggle.'.@player) == false) { clear_task() }
+            
+            
+                @ploc = ploc($player)
+                @x = @ploc[x]
+                @z = @ploc[z]
+                @radius = $r
+                @anglestep = (6.28 / $r / 25)
+             
+                @locations = array()
+                for(@angle=0, @angle < 6.28, @angle+=@anglestep)
+                {
+                    @x = @radius * cos(@angle) + @ploc[x]
+                    @z = @radius * sin(@angle) + @ploc[z]
+             
+                    @locations[] = array(x: @x, z: @z, y: @ploc[y] + 2, world: @ploc[world])
+                }
+               
+                @options = array(
+                  offsetX: 0, 
+                  offsetY: 0, 
+                  offsetZ: 0, 
+                  particleCount: 1, 
+                )
+                foreach(@loc in @locations) {
+                    play_effect(@loc, 'NOTE', @options)
+                }
+            
+        ))
+        msg('ENABLED')
+    }
+<<<
+
+/circle [$player] [$r] = >>>
+    _hasperm('rank.owner')
+    @ploc = ploc($player)
+    @x = @ploc[x]
+    @z = @ploc[z]
+    @radius = $r
+    @anglestep = (6.28 / $r / 25)
+ 
+    @locations = array()
+    for(@angle=0, @angle < 6.28, @angle+=@anglestep)
+    {
+        @x = @radius * cos(@angle) + @ploc[x]
+        @z = @radius * sin(@angle) + @ploc[z]
+ 
+        @locations[] = array(x: @x, z: @z, y: @ploc[y] + 2, world: @ploc[world])
+    }
+   
+    @options = array(
+      offsetX: 0, 
+      offsetY: 0, 
+      offsetZ: 0, 
+      particleCount: 1, 
+    )
+    foreach(@loc in @locations) {
+        play_effect(@loc, 'NOTE', @options)
+    }
+<<<
+
+/makethisitemspecial $type = >>>
+_hasperm('rank.owner')
+  if($type == 'justice') {
+    set_itemmeta(0, array(
+      display: 'Sword of Justice',
+      lore: array(
+        'Made by the great smith of the gods,',
+        'Give to Uther Lightbringer,',
+        'And now, my sword of Freedom!'
+      ),
+      enchants: array(
+        array(
+          etype: 'KNOCKBACK',
+          elevel: 512
+        ),
+        array(
+          etype: 'FIRE_ASPECT',
+          elevel: 512
+        )
+      )
+    ))
+  }
+
+  if($type == 'burn') {
+    set_itemmeta(0, array(
+      display: 'Satan\'s sword',
+      lore: array(
+        'Much fire, much pain..',
+        'All said.'
+      ),
+      enchants: array(
+        array(
+          etype: 'DURABILITY',
+          elevel: 999
+        ),
+        array(
+          etype: 'DAMAGE_ALL',
+          elevel: 5
+        ),
+        array(
+          etype: 'FIRE_ASPECT',
+          elevel: 10
+        )
+      )
+    ))
+  }
+<<<

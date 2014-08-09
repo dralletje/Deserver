@@ -1,0 +1,66 @@
+/backpack [$player=null] = >>>
+    _hasperm('commands.vip.backpack')
+    
+    assign(@worlds, array('newearth', 'newearth_nether', 'newearth_the_end'))
+    assign(@world, pworld())
+    
+    if(!array_contains(@worlds, @world)) {
+        msg(_tagmsg('backpack', 'This only works on Earth'))
+        die()
+    }
+    
+    if($player != null && has_permission('rank.owner')) {
+        assign(@player, $player)
+    }
+    else {
+        assign(@player, player())
+    }
+    
+    @title = @player.'\'s Backpack'
+    @id = 'backpack'.to_lower(@player)
+    @chest = get_virtualchest(@id)
+    @size = 9
+    
+    if(get_value(@id) == null) {
+        assign(@chest, 
+            array(
+                id: @id, 
+                size: @size, 
+                title: @title,
+                0: array(type: 276), 
+                1: array(type: 278), 
+                2: array(type: 277), 
+                3: array(type: 279),
+                4: array(type: 261),
+                5: array(type: 306),
+                6: array(type: 307),
+                7: array(type: 308),
+                8: array(type: 309)
+            )
+        )
+    }
+    else {
+        @chest = get_value(@id)
+        @chest['title'] = @title
+        @chest['id'] = @id
+        @chest['size'] = @size
+    }
+    create_virtualchest(@chest)
+    popen_virtualchest(@id)
+    
+<<<
+
+/reset backpacks = >>>
+    if(player() != 'Plancke') { die() }
+    foreach(get_offline_players(), @player){
+        clear_value('backpack'.to_lower(@player))
+    }
+<<<
+
+/delbackpack [$player] = >>>
+    _hasperm('rank.owner')
+    assign(@player, $player)
+    store_value('backpack'.@player, null)
+    del_virtualchest('backpack'.@player)
+    msg(_tagmsg('backpack', @player.'\'s backpack deleted.'))
+<<<

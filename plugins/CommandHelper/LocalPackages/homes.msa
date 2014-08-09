@@ -1,0 +1,141 @@
+/sethome [$home='[default]'] [$player=null] = >>>
+    # _hasperm('commands.home.set.own')
+    
+    @config = _readConfig('homes')
+    
+    @home = $home
+    @max = 10
+    if($player == null) { 
+        @player = player() 
+        @groups = pgroup(@player)
+        foreach(@groups, @group) { 
+            try( 
+                if(@config[@group]['maxhomes'] == '-1') { 
+                    @max = @config[@group]['maxhomes'] 
+                    break() 
+                } 
+                if(@config[@group]['maxhomes'] > @max) { @max = @config[@group]['maxhomes'] } 
+            ) 
+        }
+    } else {
+        _hasperm('commands.home.set.others')
+        @player = _player($player)  
+    }
+    
+    @player = to_lower(@player)
+    
+    if(!has_value('homes')) { store_value('homes', array()) }
+    @homes = get_value('homes')
+    if(!array_contains(array_keys(@homes), @player)) { array_set(@homes, @player, array()) }
+    
+    if(@max != '-1') { 
+        if(array_size(array_keys(@homes[@player])) >= @max) { 
+            die(_tagmsg('Home', 'Max number of homes reached {s}'.@max)) 
+        }
+    }
+    
+    array_set(@homes[@player], @home, ploc(@player))
+    
+    msg(_tagmsg('Home', 'Home {s}'.@home.' {p}set!'))
+    store_value('homes', @homes)
+<<<
+
+/listhomes [$player=null] = >>>
+    # _hasperm('commands.home.list.own')
+    if($player == null) { 
+        @player = player() 
+    } else {
+        _hasperm('commands.home.list.others')
+        @player = _player($player) 
+        if(@player == null) { @player = $player }
+    }
+    
+    @playername = @player
+    @player = to_lower(@player)
+    
+    if(!has_value('homes')) { store_value('homes', array()) }
+    @homes = get_value('homes')
+    if(!array_contains(array_keys(@homes), @player)) { array_set(@homes, @player, array()) }
+    
+    if(array_size(@homes[@player]) == 0) { die(_tagmsg('Home', 'No homes found for {s}'.@playername)) }
+    msg(_tagmsg('home', 'Current homes for {s}'.@playername.'{p} ({s}'.array_size(array_keys(@homes[@player])).'{p}): '.array_implode(array_keys(@homes[@player]), ', ') ))
+<<< 
+
+/deletehome [$] = call_alias('/delhome '.$)
+/delhome [$home='[default]'] [$player=null] = >>>
+    # _hasperm('commands.home.delete.own')
+    @home = $home
+    if($player == null) { 
+        @player = player() 
+    } else {
+        _hasperm('commands.home.delete.others')
+        @player = _player($player)  
+        if(@player == null) { @player = $player }
+    }
+    
+    @player = to_lower(@player)
+    
+    if(!has_value('homes')) { store_value('homes', array()) }
+    @homes = get_value('homes')
+    try( 
+        array_remove(@homes[@player], @home) 
+        store_value('homes', @homes)
+    , die(_tagmsg('Home', 'Home {s}'.@home.' {p}could not be deleted'))
+    )
+    msg(_tagmsg('Home', 'Home {s}'.@home.' {p}deleted'))
+<<<
+
+/home [$home='[default]'] [$player=null] = >>>
+    # _hasperm('commands.home.tp.own')
+    @home = $home
+    if($player == null) { 
+        @player = player() 
+    } else {
+        _hasperm('commands.home.tp.others')
+        @player = _player($player)  
+        if(@player == null) { @player = $player }
+    }
+    
+    @player = to_lower(@player)
+    
+    if(!has_value('homes')) { store_value('homes', array()) }
+    @homes = get_value('homes')
+    
+    try( _set_ploc(player(), @homes[@player][@home]) , die(_tagmsg('Home', 'Home does not exist')))
+    if(@home == '[default]') { die(_tagmsg('Home', 'Teleported to your home')) }
+    msg(_tagmsg('Home', 'Teleported to home {s}'.@home))
+<<<
+
+# /fixhomes = >>>
+# @homes = get_value('homes')
+# array_set(@homes, 'dimby', array())
+# store_value('homes', @homes)
+# foreach(@player in array_keys(get_value('homes'))) {
+    # console(@player)
+# }
+# <<<
+
+# Stores user home locations.
+# <username>;<x>;<y>;<z>;<pitch>;<yaw>;<world>[;<name>]
+# /converthomes = >>>
+    # if(player() != 'Plancke') { die() }
+    # @homes = read('../../MultiHome/homes.txt')
+    # if(!has_value('homes')) { store_value('homes', array()) }
+    # @newhomes = get_value('homes')
+    
+    # foreach(split('\n', @homes), @homeline) {
+        # try(
+            # @split = split(';', @homeline)
+            # if(!array_contains(array_keys(@newhomes), @split[0])) { array_set(@newhomes, @split[0], array()) }
+            # if(array_size(@split) != 8) {
+                # @split[6] = substr(@split[6], 0, length(@split[6]) - 1)
+                # array_push(@split, '[default]')
+            # }
+            # array_set(@newhomes[@split[0]], @split[7], array('x':@split[1], 'y':@split[2], 'z':@split[3], 'pitch':@split[4], 'yaw':@split[5], 'world':@split[6])) 
+        # , continue()
+        # )
+    # }
+    
+    # store_value('homes', @newhomes)
+    # msg(_tagmsg('Home', 'Home converting done'))
+# <<<

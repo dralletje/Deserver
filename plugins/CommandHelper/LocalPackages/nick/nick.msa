@@ -1,0 +1,24 @@
+/resetnick $name = >>>
+    _set_player_nick($name, null)
+    set_list_name($name, null)
+<<<
+
+/nick $nick = >>>
+    _set_player_nick(player(), $nick)
+    @color = get_value('color'.player())
+    _set_player_color(player())
+<<<
+
+/nick $name $nick = >>>
+    @player = _player($name)
+    if(@player == null) {
+        @player = $name
+    }
+    _set_player_nick(@player, $nick)
+    @color = get_value('color'.$name)
+    _set_player_color(@player)
+<<<
+
+/checknick $player = >>>
+    msg(_tagmsg('Laborant', 'Closest Match: '._player($player)))
+<<<

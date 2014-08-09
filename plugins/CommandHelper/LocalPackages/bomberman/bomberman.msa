@@ -1,0 +1,18 @@
+######################################################
+## Sample command
+######################################################
+/bomberman toggle $player  = >>>
+    include('../../includes/bomberman.ms')
+
+    assign(@player, _player($player)) 
+    assign(@status,  not(_bomberman_player_get(@player, 'isplaying', false)))
+    
+    if(@status) { 
+        set_max_health(pinfo(@player)['13'], 20) 
+    } else { 
+        set_max_health(pinfo(@player)['13'], 20) 
+    } 
+    
+    msg(_tagmsg('Bomber', 'Settings ' . @player . ' bombs to ' . @status))
+    _bomberman_player_set(@player, 'isplaying', @status)
+<<<

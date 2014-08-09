@@ -1,0 +1,272 @@
+######################################################
+## Let a moderator claim a plot. This will be improved!
+######################################################
+/plot outline = _plot_outline(_location_to_plot(ploc()))
+
+/plot multiclaim [$player] = >>>
+    _plot_world()
+    _hasperm('plot.multiclaim')
+    assign(@next, import('plots.util.multiclaim.'.player()))
+
+    if(!is_array(@next) && $player != null) {
+        assign(@player, _player($player, 'player'))
+        msg(_tagmsg('Estate agent', 'First point set, set the second using:'))
+        msg(_tagmsg('Estate agent', '\'/plot multiclaim\' without an player!'))
+        export('plots.util.multiclaim.'.player(), array(ploc(), @player))
+        die()
+    }
+    
+    assign(@b1, _location_to_plot(ploc()))
+    assign(@b2, _location_to_plot(@next[0]))
+    
+    if((min(@b1[0], @b2[0]) - max(@b1[0], @b2[0])) * (min(@b1[1], @b2[1]) - max(@b1[1], @b2[1]) > 9)) {
+        die(_tagmsg('Estate agent', 'Don\'t claim more then 9 plots at once!'))
+    }
+
+    for(assign(@x, min(@b1[0], @b2[0])), lte(@x, max(@b1[0], @b2[0])), inc(@x),
+        for(assign(@y, min(@b1[1], @b2[1])), lte(@y, max(@b1[1], @b2[1])), inc(@y),
+            assign(@plotname, 'plots.'.pworld().'.'.replace(@x,'-','_').'.'.replace(@y,'-','_'))
+            assign(@currentowner, get_value(@plotname))
+            if(@currentowner != null && @currentowner != player()) {
+                die(_tagmsg('Estate agent', 'You can\'t claim owned plots! Aborting operation'))
+            }
+            
+            store_value(@plotname,  @next[1])
+        )
+    )
+    msg(_tagmsg('Estate agent', 'Plots has been claimed for '.@next[1]))
+    export('plots.util.multiclaim.'.player(), null)
+<<<
+
+/plot claim [$player] = >>>
+    _plot_world()
+    
+    assign(@plotname, _location_to_plot(ploc(), true))
+    if(get_value(@plotname) != @player && get_value(@plotname) != null) {
+        die(_tagmsg('Estate agent', 'Plot is already claimed!'))
+    }
+    
+    assign(@player, _player($player, 'player'))
+    
+    if(@player == player()) {      
+        assign(@plotsperplayer, get_value('plots.players', @player))
+        if(@plotsperplayer == null) { assign(@plotsperplayer, array()) }
+        assign(@allowedplots, 3)
+        if(has_permission('rank.trusted')) { assign(@allowedplots, 10) }
+        if(length(@plotsperplayer) >= @allowedplots && !has_permission('plot.claim')) {
+            die(_tagmsg('Estate', 'You can\'t claim more then three plots for yourself, ask an admin or veteran to do it for ya'))
+        }
+        
+        assign(@plotcoords, _location_to_plot(ploc()))
+        _plot_add_player_plot(@player)
+        store_value(@plotname,  @player)
+        msg(_tagmsg('Estate agent', 'Plot has been claimed for '.@player))
+        tmsg(@player, _tagmsg('Estate agent', 'Plot has been claimed for you by '.player()))
+        _plot_outline(@plotcoords)
+        die()
+    }
+    
+    _hasperm('plot.claim')
+    
+    assign(@plotcoords, _location_to_plot(ploc()))
+    _plot_add_player_plot(@player)
+    store_value(@plotname,  @player)
+    msg(_tagmsg('Estate agent', 'Plot has been claimed for '.@player))
+    tmsg(@player, _tagmsg('Estate agent', 'Plot has been claimed for you by '.player()))
+    _plot_outline(@plotcoords)
+    die()
+<<<
+
+/plot unclaim = >>>
+    _plot_world()
+    _hasperm('plot.delete')
+    assign(@plotname, _location_to_plot(ploc(), true))
+    assign(@plotcoords, _location_to_plot(ploc()))
+    assign(@owner, get_value(@plotname))
+    
+    if(@owner == '' && @owner == null) {
+        die(_tagmsg('Estate agent', 'Plot is not claimed!'))
+    }
+
+    _plot_wipe(@plotcoords)
+    clear_value(@plotname)
+    assign(@plotsperplayer, get_value('plots.players', @owner))
+    assign(@newplots, _array_delete(@plotsperplayer, @plotcoords[0].','.@plotcoords[1].','.pworld()))
+    store_value('plots.players', @owner, @newplots)
+    
+    msg(_tagmsg('Estate agent', 'Plot has been unclaimed from '.@owner))
+<<<
+
+######################################################
+## These commands do addremove players to plots
+######################################################
+/plot add $player  = >>>
+    _plot_world()
+    assign(@plotname, _location_to_plot(ploc(), true))
+
+    _plot_owns(@plotname) 
+    assign(@player, _player($player, 'name'))
+    assign(@members, get_value(@plotname.'.members'))
+    
+    if(!is_array(@members)) {
+        assign(@members, array())
+    }
+    if(array_contains_ic(@members, @player)) {
+        die(_tagmsg('Estate manager', 'Player was already added to this plot'))
+    }
+    array_push(@members, @player)
+    store_value(@plotname.'.members', @members)
+    msg(_tagmsg('Estate manager', 'Player added to your plot!'))
+<<<
+
+/plot remove $player  = >>>
+    _plot_world()
+    assign(@plotname, _location_to_plot(ploc(), true))
+    _plot_owns(@plotname)
+    
+    assign(@player, _player($player, 'name'))
+    assign(@members, get_value(@plotname.'.members'))
+    
+    if(!array_contains(@members, @player)) {
+        die(_tagmsg('Estate manager', 'Player is not a member of this plot.'))
+    }
+    
+    assign(@members, _array_delete(@members, @player))
+    
+    store_value(@plotname.'.members', @members)
+    msg(_tagmsg('Estate manager', 'Player removed from your plot!'))
+<<<
+
+######################################################
+## Teleport to your, or somebody elses plot.
+######################################################
+/plot teleport [$name=1] [$extra=null] = >>>
+    _plot_world()
+    assign(@plot, null)
+    
+    if(is_numeric($name)) {
+        assign(@plots, get_value('plots.players', player()))
+        if(!array_index_exists(@plots, ($name-1))) {
+            die(_tagmsg('estate', 'No plot with that ID found'))
+        }
+        assign(@plot, @plots[($name-1)])
+    } 
+    
+    if(is_numeric($extra) && @plot == null) {
+        assign(@plots, get_value('plots.players', $name))
+        if(!array_index_exists(@plots, ($extra-1))) {
+            die(_tagmsg('estate', 'No plot with that ID found'))
+        }
+        assign(@plot, @plots[($extra-1)])
+    }
+    if(@plot == null) {
+        assign(@plotname, 'plots.names.'.$name)
+        assign(@plot, get_value(@plotname))    
+        if(!is_array(@plot)) {
+            die(_tagmsg('Estate manager', 'No plot found with that name'))
+        }
+    }
+    
+    assign(@teleport, get_value(_location_to_plot(ploc(), true), 'teleport'))
+    if(@teleport == null) {
+        assign(@temptp, _plot_to_location(@plot))
+        assign(@teleport, array(@temptp[0][0], 35, @temptp[0][2]))
+    }
+    
+    set_ploc(@teleport)
+    msg(_tagmsg('Estate manager', 'Teleported to plot '.$name))
+<<<
+
+/plot tp [$] = call_alias('/plot teleport '.$)
+/plot warp [$] = call_alias('/plot teleport '.$)
+
+/plot list = >>>
+    _plot_world()
+    
+    msg(_tagmsg('Estate', 'You own the following plots:'))
+    msg(_tagmsg('Estate manager', 'Teleport to them using \'/plot teleport <ID>\''))
+    assign(@plots, get_value('plots.players', player()))
+    foreach(
+        array_keys(@plots), 
+        @plotnum,
+        assign(@plot, @plots[@plotnum])
+        msg(color(5). '['.(@plotnum+1).'] '. color(7). @plot[0].','.@plot[1].' in '. @plot[2])
+    )
+<<<
+
+/plot setname $name = >>>
+    _plot_world()
+    assign(@plotname, _location_to_plot(ploc(), true))
+    assign(@plotcoords, _location_to_plot(ploc()))
+    _plot_owns(@plotname)
+    
+    if(has_value('plots.names', $name)) {
+        die(_tagmsg('estate', 'That name is already taken'))
+    }
+    if(has_value(@plotname, 'name')) {
+        clear_value('plots', 'names', get_value(@plotname, 'name'))
+    } 
+
+    store_value(@plotname, 'name', $name)
+    if(!has_value(@plotname, 'teleport')) {
+        store_value(@plotname, 'teleport', ploc())
+    }
+    store_value('plots.names', $name, @plotcoords)
+    die(_tagmsg('estate', 'plot name is now '.$name))
+<<<
+
+/plot setteleport = >>>
+    _plot_world()
+    assign(@plotname, _location_to_plot(ploc(), true))
+    assign(@plotcoords, _location_to_plot(ploc()))
+    _plot_owns(@plotname)
+
+    store_value(@plotname, 'teleport', ploc())
+    die(_tagmsg('estate', 'plot teleport point is set!'))
+<<<
+
+######################################################
+## Find a empty plot.
+######################################################
+/plot find = >>>
+    _plot_world()
+    assign(@plotname, _location_to_plot(ploc(), true))
+    assign(@loc, ploc())
+    if(get_value(@plotname) == null) {
+        die(_tagmsg('Estate agent', 'Plot is not claimed!'))
+    }
+    
+    for(
+        assign(@times, 0), 
+        @times < 100, 
+        @times++, 
+        assign(@location, array((@loc[0] + 71*@times),35,@loc[2],pworld()))
+        assign(@plotname, _location_to_plot(@location, true))
+        if(get_value(@plotname) != null) {
+            continue()
+        }
+        set_ploc(@location)
+        die(_tagmsg('Estate agent', 'There is your empty plot!'))
+    )
+    msg(_tagmsg('Estate agent', 'There couln\'t be found a near empty plot, try again.'))
+<<<
+
+/plot info = >>>
+    _plot_world()
+    assign(@plotname, _location_to_plot(ploc(), true))
+    assign(@loc, ploc())
+    if(get_value(@plotname) == null) {
+        die(_tagmsg('Estate agent', 'Plot is not claimed!'))
+    }
+    
+    msg(_tagmsg('estate', 'Following info has been found:'))
+    foreach(
+        get_values(@plotname), 
+        @value, 
+        msg(color('5').'- '.color('f').@value)
+    )
+<<<
+
+/plot = >>>
+_help('mercury')
+<<<

@@ -1,0 +1,69 @@
+# /kick = >>>
+    # msg(_tagmsg('Police', 'Specify a player and/or a reason'))
+# <<<
+
+# /kick $player = >>>
+    # assign(@playertokick, _init($player, 'kick.kick'))
+
+    # if(has_permission('kick.withoutreason')) {
+        # kick(@playertokick, 'Kicked by admin')
+        # _adminmsg(player().' kicked '.@playertokick.' (no reason)')
+    # } else {
+        # msg(_tagmsg('Police', 'Specify a reason'))
+    # }
+# <<<
+
+# /kick $player $ = >>>
+    # _admin_hasperm(player())
+    # assign(@playertokick, _player($player))
+    # kick(@playertokick, $)
+    # _adminmsg(player().' kicked '.@playertokick.' ('.$.')')
+# <<<
+    
+# /ban = >>>
+    # msg(_tagmsg('Police', 'Specify a player and a reason'))
+# <<<
+
+# /ban $player = >>>
+    # msg(_tagmsg('Police', 'Specify a reason'))
+# <<<
+
+# /ban $player $reason = >>>
+    # if(!has_permission('banning.direct')) {
+        # if(has_permission('banning.strike')) {
+            # die(_tagmsg('police', 'You can\'t ban, but you can strike: /strike <player> <reason>'))
+        # }
+        # die(_tagmsg('police', 'No way mista!'))
+    # }
+
+    # include('strikes.ms')
+    
+    # assign(@reason, to_lower($reason))
+    # assign(@player, _player($player, 'name'))
+    
+    # if(@reason == 'grief') {
+        # _strike_add(@player, 'Griefing')
+        # _strike_add(@player, 'Griefing', true)
+        # die(_tagmsg('police', @player.' can now only play on mars, next strike is a full ban'))
+    # }
+    # if(@reason == 'advertising' || @reason == 'spam') {
+        # _strike_add(@player, @reason)
+        # _strike_add(@player, @reason, true)
+        # _strike_add(@player, @reason, true)
+        # die(_tagmsg('police', @player.' is now fully banned (:'))
+    # }
+    
+    # msg(_tagmsg('Police', 'For direct ban there are three reason:'))
+    # msg(color(5).'*'.color(7).' Grief - Bans to mars only')
+    # msg(color(5).'*'.color(7).' Advertising - Full ban')
+    # msg(color(5).'*'.color(7).' Spam - Full ban')
+    # msg(_tagmsg('Police', 'If you wanna add some others, contact immortal on the forums.'))
+# <<<
+
+# /unban $player = >>>
+        # if(!pbanned($player)) {
+            # msg(_tagmsg('Police', $player.' is not banned D:'))
+        # }
+        # set_pbanned($player, false)
+        # msg(_tagmsg('Police', $player.' is now unbanned!'))
+# <<<

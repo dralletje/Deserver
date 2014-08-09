@@ -1,0 +1,14 @@
+/testirc = >>>
+  include(_si('network'))
+  _network_question('online the_immortal', closure(@response,
+    broadcast(@response)
+  ))
+<<<
+
+/justjoined = >>>
+  _array_map_async(array(1,2,3), closure(@cb, @val) {
+    execute(@val * @val, @cb)
+  }, closure(@result) {
+    broadcast(@result)
+  })
+<<<

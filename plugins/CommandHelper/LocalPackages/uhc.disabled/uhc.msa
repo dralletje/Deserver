@@ -1,0 +1,127 @@
+/uhc wall $rad $block [$] = >>>
+    _hasperm('rank.owner')
+    @radius = integer($rad)
+    @block = $block
+    @world = pworld() 
+    if(@world != 'uhc' && @world != 'uhc_nether' && @world != 'uhc_the_end') { die() }
+    
+    msg(_tagmsg('UHC', 'Starting building process.'))
+    
+    @x1 = @radius
+    @x2 = @radius-(@radius*2)
+    @z1 = @radius
+    @z2 = @radius-(@radius*2)
+    @y = 0
+    export('UHC', @y)    
+    sudo('//limit -1')
+    
+    set_interval(1000, closure(
+        @y = import('UHC')
+        sk_pos1(array(@x1, @y, @z1, @world))
+        sk_pos2(array(@x2, @y+4, @z2, @world))
+        sudo('//walls '.@block)
+        @newheight = @y + 5
+        export('UHC', @newheight)
+        msg(_tagmsg('UHC', 'Current height: '.color(6).@y))
+        if(@y >= 255) {
+            clear_task()
+            sudo('//limit 5000')
+            msg(_tagmsg('UHC', 'Wall built.'))
+        }
+    ))
+<<<
+
+/uhc create = >>>
+    _hasperm('rank.owner')
+    @config = yml_decode(read('uhc.config'))
+    @radius = @config['wall']['radius']
+    @block = @config['wall']['block']
+    @worlds = @config['worlds']
+    
+    foreach(@worlds, @world) {
+        sudo('/mv create '.@world['name'].' '.@world['environment'])
+        sudo('/mv gamerule naturalRegeneration false '.@world['name'])
+        sudo('/mvm set color '.@world['color'].' '.@world['name'])
+        sudo('/mvm set alias '.@world['alias'].' '.@world['name'])
+    }  
+<<<
+
+/uhc delete = >>>
+    _hasperm('rank.owner')
+    @config = yml_decode(read('uhc.config'))
+    @worlds = @config['worlds']
+    
+    foreach(@worlds, @world) {
+        sudo('/mv delete '.@world['name'])
+        sudo('/mvconfirm')
+    }
+    
+    msg(_tagmsg('UHC', 'Remember to delete the inventory files'))
+<<<
+
+/uhc color = >>>
+    _hasperm('rank.owner')
+    include('uhc.ms')
+    _colornamesUHC()
+<<<
+
+/uhc spectator = >>>
+    _hasperm('uhc.spectate')
+    set_pflight(player(), true)
+    sudo('/v on')
+<<<
+
+/uhc spread = >>>
+    _hasperm('rank.owner')
+    @teams = get_value('CurUHC', 'Teams')
+    @spread = 500
+    @angle = to_radians(360 / array_size(@teams))
+    @pos = array()
+    for(@i = 1, @i <= array_size(@teams), @i++) {
+        @x = @spread * cos(@angle * @i)
+        @z = @spread * sin(@angle * @i)
+        array_push(@pos, array(@x, @z))
+    }
+    for(@i = 0, @i <= array_size(@pos) - 1, @i++) {
+        @curpos = @pos[@i]
+        @team = @teams[@i]
+        @newloc = array(@curpos[0], 200, @curpos[1])
+        foreach(@team, @player) {
+            set_ploc(@player, @newloc)
+            set_peffect(@player, 11, 255, 20)
+        }
+    }
+<<<
+
+/uhc healall = >>>
+    _hasperm('rank.owner')
+    @players = get_value('CurUHC', 'Players')
+    foreach(@players, @player) {
+        set_psaturation(@player, 20)
+        set_phealth(@player, 20)
+        set_pfood(@player, 20)
+    }
+<<<
+
+/uhc start = >>>
+    _hasperm('rank.owner')
+    include('uhc.ms')
+    _uhcstart()
+<<<
+
+/uhc stop = >>>
+    _hasperm('rank.owner')
+    include('uhc.ms')
+    _uhcstop()
+<<<
+
+/uhc teamchat = >>>
+    @state = get_value('CurUHC', 'Teamchat', player())
+    if(@state == null || @state == false) {
+        store_value('CurUHC', 'Teamchat', player(), true)
+        msg(_tagmsg('UHC', 'Teamchat enabled.'))
+    } else {
+        store_value('CurUHC', 'Teamchat', player(), false)
+        msg(_tagmsg('UHC', 'Teamchat disabled.'))
+    }   
+<<<

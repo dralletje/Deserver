@@ -1,0 +1,12 @@
+######################################################
+## Only here to do the one slashed brushes
+######################################################
+
+/br [$] = call_alias('/brush '.$)
+/brush [$] = _gmask('builder', 'gmask')
+
+# Some fixes for the unknown command thing of we
+/tree [$] = run('/tree '.$)
+/deltree [$] = run('/deltree '.$)
+
+/mask [$] = run('/mask '.$)

@@ -1,0 +1,10 @@
+/builder $player = >>>
+    _hasperm('rank.uberbuilder')
+    @player = _player($player)
+    runas('~console', '/do pex user '.@player.' group add builder')
+    _broadcast(_tagmsg('Builder', _get_player_nick(@player).' has been promoted to builder!'))
+<<<
+
+/colorcb = >>>
+    set_block_command(pcursor(), colorize(get_block_command(pcursor())))
+<<<

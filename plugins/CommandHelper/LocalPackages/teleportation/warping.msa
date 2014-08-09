@@ -1,0 +1,43 @@
+/warp $warp [$player=null] = >>>
+    _hasperm('commands.warp.self')
+    if($player == null) { 
+        msg(_tagmsg('Warp', 'Warping to '.$warp.'!'))
+        set_ploc(player(), get_value('Warp', $warp))
+        pfacing(player(), get_value('Warp', $warp, 'Yaw'), 0)
+    }
+    else {
+        _hasperm('commands.warp.other')
+        msg(_tagmsg('Warp', 'Warping '.$player.' to '.$warp.'!'))
+        set_ploc($player, get_value('Warp', $warp))
+        pfacing($player, get_value('Warp', $warp, 'Yaw'), 0)
+    }
+<<<
+
+/setwarp $warp = >>>
+    _hasperm('commands.warp.set')
+    assign(@warp, $warp)
+    assign(@coordinates, ploc(player()))
+    assign(@facing, pfacing())
+    assign(@yaw, _calculate_nearest_degree(45, @facing[0])) # Change the 45 to set it to a different interval and making it more sensitive
+    store_value('Warp', @warp, @coordinates)
+    store_value('Warp', @warp, 'Yaw', @yaw)
+    msg(_tagmsg('Warp', 'Warp '.@warp.' has been placed at your current position!'))
+<<<
+
+/removewarp $warp = call_alias('/deletewarp '.$warp)
+/deletewarp $warp = >>>
+    _hasperm('commands.warp.remove')
+    if(get_value('Warp', $warp) != null) {
+        clear_value('Warp', $warp)
+        msg(_tagmsg('Warp', 'Warp '.$warp.' has been deleted!'))
+    }
+    else { die(_tagmsg('Warp', 'Warp '.$warp.' has not been found')) }
+<<<
+
+/warps = call_alias('/listwarps')
+/listwarps = >>>
+    _hasperm('commands.warp.list')
+    if(get_values('Warp') == array()) { die(_tagmsg('Warp', 'No warps have been found')) }
+    assign(@warplist, replace(array_implode(array_keys(get_values('Warp')), ', '), 'Warp.', ''))
+    msg(_tagmsg('Warp', @warplist))
+<<<

@@ -1,0 +1,20 @@
+######################################################
+## Sample command
+######################################################
+/afk [$] = >>>
+    @config = _readConfig('pex')
+    @player = player()
+    @afk = 'false'
+    try( @afk = @config['users'][@player]['options']['afk'] )
+    if(@afk == 'false') {
+        runas('~console', "/pex user @player set afk true")
+        array_set(@config['users'][@player]['options'], 'afk', 'true')
+        msg(_tagmsg('afk', _get_player_nick(@player).' is now marked as afk!'))
+    }
+    else {
+        runas('~console', "/pex user @player set afk false")
+        array_set(@config['users'][@player]['options'], 'afk', 'false')
+        msg(_tagmsg('afk', _get_player_nick(@player).' is no longer afk!'))
+    }
+    export('config.pex', @config)
+<<<

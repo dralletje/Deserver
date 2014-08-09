@@ -1,0 +1,59 @@
+bind(entity_damage_player, null, null, @event,
+    if(pworld() == 'newpvp' || pworld() == 'newpvp_nether' || pworld() == 'pvp_the_end') {
+        if(@event['damager'] == 'PLAYER') {
+            assign(@value, 'pvp.log.'.@event['player'])
+            assign(@value2, 'pvp.log.'.@event['data'])
+            if(not(has_value(@value))) {
+                store_value(@value, (time() + 15000))
+                msg(_tagmsg('PVP', 'You have engaged in battle, do not disconnect or tp away'))
+                set_timeout(15000, closure(if(has_value(@value)){
+                    clear_value(@value)
+                    msg(_tagmsg('PVP', 'Combat Timer Ended!'))
+                }))
+            } 
+            if(not(has_value(@value2))) {
+                store_value(@value2, (time() + 15000))
+                tmsg(@event['data'], _tagmsg('PVP', 'You have engaged in battle, do not disconnect or tp away'))
+                set_timeout(15000, closure(if(has_value(@value2)){
+                    clear_value(@value2)
+                    tmsg(@event['data'], _tagmsg('PVP', 'Combat Timer Ended!'))
+                }))
+            } 
+            else {
+                die()
+            }
+        }
+    }
+)
+ 
+bind(player_quit, null, null, @event,
+assign(@value, concat('pvp.log.', @event['player']))
+    if(has_value(@value)) {
+        kill(player())
+        broadcast(_tagmsg('PVP', player().' has been killed and striked for combat logging'))
+        store_value('pvp.status.'.player(), true)
+    }
+)
+
+bind(player_teleport, null, null, @event,
+    if(get_value('pvp.status.'.@event['player']) == true) {
+        clear_value('pvp.log.'.@event['player'])
+        clear_value('pvp.status.'.@event['player'])
+        kill(@event['player'])
+        broadcast(_tagmsg('PVP', @event['player'].' has been killed for tping away from battle'))
+        msg(_tagmsg('PVP', @event['player'].' you have been striked for being a coward!'))
+        _strike_add(@event['player'], 'Tping away from battle', true)
+    }
+    cancel()
+)
+ 
+bind(player_join, null, null, @event,
+    if(get_value('pvp.status.'.player()) == true) {
+        clear_value('pvp.log.'.player())
+        clear_value('pvp.status.'.player())
+        set_timeout(300, closure(
+            msg(_tagmsg('PVP', player().' you have been striked for being a coward!'))
+            _strike_add(player(), 'Tping away from battle', false)
+        ))
+    }
+)

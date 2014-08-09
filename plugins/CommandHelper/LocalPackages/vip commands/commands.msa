@@ -1,0 +1,78 @@
+/colorme [$colorcode] [$reset] = >>>
+    # if(!_isAllowed(player())) { die('Plancke is fixing colorme') }
+
+    @colorcode = to_lower($colorcode)
+    
+    @notAllowed = array(
+        'k' : 'rank.owner',
+        'l' : 'rank.owner',
+        'o' : 'rank.owner',
+        'n' : 'rank.owner',
+        'm' : 'rank.owner',
+        '0' : 'rank.owner',
+        '1' : 'rank.owner'
+    )
+    if(array_index_exists(@notAllowed, @colorcode)) { _hasperm('rank.owner', 'owner') }
+    
+    if(length(@colorcode) == '0') { die(_help('colorme')) }
+    if(length(@colorcode) != '1') { _hasperm('rank.owner', 'owner') }
+    
+    @reset = $reset
+    if(!has_permission('rank.vip')) { @reset = 'reset' } #non vip reset force
+        
+    @noperms = array(false)
+    @groups = _readConfig('pex')['groups']
+    foreach(@group:@options in @groups) {
+        if(@options['prefix'] == "&@colorcode") {
+            if(has_permission("rank.@group")) {
+                if(@reset == 'reset'){
+                    @prefix = '&'.@colorcode
+                } else {
+                    _hasperm('rank.vip') 
+                    @prefix = '&7[&'.@colorcode.'VIP&7] &'.@colorcode
+                }
+                @noperms = array(false, @options)
+                break()
+            } else {
+                @noperms = array(true, @options)
+            }
+        }        
+    }
+    
+    if(@noperms[0]) { die(_tagmsg('colorme', 'You need '.colorize(@noperms[1]['prefix']).@noperms[1]['options']['realname'].'{p} to access that color.')) }
+    
+    if(@prefix == '') {
+        if(@reset == 'reset'){
+            _hasperm('rank.uberadmin')
+            @prefix = '&'.@colorcode
+        } else {
+            _hasperm('rank.vip') 
+            @prefix = '&7[&'.@colorcode.'VIP&7] &'.@colorcode
+        }
+    }
+
+    msg(_tagmsg('colorme', 'You are now seen as: '.colorize(@prefix.player())))
+    
+    runas('~console', '/pex user '.player().' prefix "'.@prefix.'"')
+    @pex = _readConfig('pex')
+    array_set(@pex['users'][player()], 'prefix', @prefix)
+    export('config.pex', @pex)
+    store_value('color.'.player(), @prefix)
+    _set_list_name(player())
+<<<
+
+/makebird [$player=''] = >>>
+    _hasperm('rank.vip', 'vip')
+    
+    if(_inWorld(pworld(), 'skyblock')) { die(_tagmsg('Makebird', 'Not on Saturn')) }
+    if(_inWorld(pworld(), 'space')) { die(_tagmsg('Makebird', 'Not on SolarSystem')) }
+    if(_inWorld(pworld(), 'mars')) { die(_tagmsg('Makebird', 'Not on Mars')) }
+    
+    assign(@player, _effect($player, 'makebird'))
+    if(@player != player()) {
+        _hasperm('rank.owner', 'owner')
+    }
+    msg(_tagmsg('Herobrine', _nick(@player). ' transformed into a bird :D'))
+    tmsg(@player, _tagmsg('Herobrine', 'Your arms transformed into wings!'))
+    set_pflight(@player, true)
+<<<

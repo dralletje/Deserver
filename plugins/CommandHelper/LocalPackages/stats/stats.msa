@@ -1,0 +1,102 @@
+/setstat $player $stat $val = >>>
+    if(!_isAllowed(player())) { die() }
+    _storeInfo($player, $stat, $val)
+<<<
+
+/storeranks = >>>
+    if(!_isAllowed(player())) { die() }
+    _storeRankInfo()
+<<<
+
+/pstats [$player=null] = >>>
+    if($player == null) {
+        @player = player()
+    } else {
+        @player = _player($player)
+        
+        if(@player == null) {
+            @player = $player
+        }
+    }
+    
+    proc(_convertTimeOld, @time,
+        @hours = floor(@time / 3600)
+        @time = @time - (@hours * 3600)
+        @mins = floor(@time / 60)
+        
+        return(@hours.'h '.@mins.'m')
+    )
+    
+    proc(_convertTime, @time,
+        @days = floor(@time / (3600 * 24))
+        @time -= @days * 3600 * 24
+        @hours = floor(@time / 3600)
+        @time -= @hours * 3600
+        @mins = floor(@time / 60)
+        
+        return(@days.' days '.@hours.'h '.@mins.'m')
+    )
+    
+    @info = _getInfo(@player)[0]
+    
+    @noshow = array('uuid', 'promote_timer', 'timestamp', 'login_count')
+    @keys = array('online_time': 'Online Time', 
+                  'name': 'Name', 
+                  'first_played': 'Lastlogin', 
+                  'nick': 'Nick', 
+                  'status': 'Status',
+            )
+    foreach(array_keys(@info), @key) {
+        @val = @info[@key]
+        if(@val == '' || @val == null) { continue() }
+        if(array_contains(@noshow, @key)) { continue() }
+        if(@string != '') { @string .= '\n' }
+        try( @dispkey = @keys[@key], @dispkey = _capitalize(@key) )
+        
+        if(@key == 'status') { if(@val == 'Online') { @val = '&a'.@val } else { @val = '&c'.@val } }
+        if(@key == 'first_played') { @val = simple_date('dd/MM/yyyy HH:mm:ss', @val) }
+        if(@key == 'online_time') { @val = _convertTime(@val) }
+        
+        @string .= '{p}'.@dispkey.':{p} '.@val
+    }
+    
+    if(ponline(@player)) {
+        @pex = _readConfig('pex')
+        @groups = array()
+        foreach(@group in pgroup(@player)) {    
+            array_push(@groups, colorize(@pex['groups'][@group]['prefix']).@pex['groups'][@group]['options']['realname'])
+        }
+        
+        @string .= '\n{p}Groups: '.array_implode(@groups, '{p}, ')
+    }
+    
+    # foreach(@key:@val in @info) {
+        # _adminmsg(@key. ' ---- '.@val)
+        # if(@val == '' || @val == null) { continue() }
+        # _adminmsg(@key. ' ---- '.@val)
+        # if(array_contains(@noshow, @key)) { continue() }
+        # if(@string != '') { @string .= '\n' }
+        # try( @dispkey = @keys[@key], @dispkey = _capitalize(@key) )
+        
+        # if(@key == 'status') { if(@val == 'Online') { @val = '&a'.@val } else { @val = '&c'.@val } }
+        # if(@key == 'first_played') { @val = simple_date('dd/MM/yyyy HH:mm:ss', @val) }
+        # if(@key == 'online_time') { @val = _convertTime(@val) }
+        
+        # @string .= '{p}'.@dispkey.':{p} '.@val
+    # }
+    
+    msg(_tagmsg('Stats', @string))
+<<<
+
+# /plot savelist $player = >>>
+    # include('/../regions/plots/plots.inc')
+    
+    # assign(@list, array())
+    
+    # assign(@plots, get_value('plots.players', $player))
+    # foreach(array_keys(@plots), @plotnum) {
+        # @plot = @plots[@plotnum]
+        # array_set(@list, (@plotnum+1), @plot[0].','.@plot[1].' in '. @plot[2])
+    # }
+    # try( chd_write('playerPlots.json', json_encode(@list)), @ex, broadcast(_tagmsg('God', 'Error writing to file, file does not exist. Report to Plancke')) )
+# <<<

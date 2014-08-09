@@ -1,0 +1,21 @@
+/is giveitems $player = >>>
+    _hasperm('rank.owner')
+    @player = $player
+    @items = array(array(79, 2),
+                    array(327, 1),
+                    array(295, 1),
+                    array(361, 1),
+                    array(360, 1),
+                    array(338, 1),
+                    array(39, 1),
+                    array(40, 1),
+                    array(352, 3),
+                    array(287, 12)
+                )
+                
+    foreach(@items, @item) {
+        pgive_item(@player, @item[0], @item[1], array())
+    }
+    store_value('Skyblock', @player, true)
+    tmsg(@player, _tagmsg('Skyblock', 'There is a 1.7 bug with the chest so I am giving you the stuff in your inventory'))
+<<<

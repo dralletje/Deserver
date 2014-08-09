@@ -1,0 +1,8 @@
+player:
+  - 'Welcome to Deserver. Enjoy your stay!'
+  - 'Use &o/help&7 to get help'
+  - 'Use &o/goto&7 to move from world to world'
+  - 'We also have a forum: &oforum.deserver.tk'
+  - 'Use &o/head NAME&7 to spawn a head'
+vip:
+  - 'Use &o/backpack&7 to open your backpack'

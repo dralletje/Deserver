@@ -1,0 +1,16 @@
+##############################################
+## Private messaging stuff, mostly just passing it
+## to chat event which will handdle the rest.
+##############################################
+
+
+/msg admin $ = _adminmsg(player().': '.$)
+
+/msg $p $ = >>>
+    msg(_tagmsg('Messaging', 'You can also use {s}@Name Message {p}to message!'))
+    chat(concat('@', $p, ' ', $))
+<<<
+/tell $p $ = call_alias('/msg '.$p.' '.$)
+/w $p $ = call_alias('/msg '.$p.' '.$)
+ 
+/reply $ = msg(_tagmsg('Messaging', 'Use {s}@Name Message {p}to message!'))

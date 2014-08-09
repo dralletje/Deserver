@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<profiles>
+    <!-- SQL Profiles go here. A sample MySQL profile configuration is provided. See the documentation
+		on SQL for more detailed information about this file. -->
+	<profile id="CommandHelper">
+		<type>mysql</type>
+		<database>deserver</database>
+		<host>localhost</host>
+		<port>3306</port>
+		<username>deserver</username>
+		<password>JRCqGvfJeeQGAjzKsGWR8pNf</password>
+	</profile>
+</profiles>

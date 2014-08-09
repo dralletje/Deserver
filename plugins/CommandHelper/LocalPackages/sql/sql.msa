@@ -1,0 +1,4 @@
+# /test = >>>
+    # @table = 'commandhelper_players'
+    # query('CommandHelper', _delete(@table))
+# <<<

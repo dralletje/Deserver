@@ -1,0 +1,25 @@
+######################################################
+## Sample command
+######################################################
+
+/vote $player $ = >>>
+    if(player() != '~console') { die(_tagmsg('vote', 'No perms for you, human being!')) }
+    
+    broadcast(_tagmsg('vote', $player.' voted on for deserver on {s}'.$.'{p}!'))
+	broadcast(_tagmsg('vote', 'Vote here: \u00A7ohttp://deserver.tk/vote.php'))
+    
+    if(rand(100) == 50 || $player == 'Plancke') { 
+        if(rand(100) == 50 || $player == 'Plancke') { 
+            if(rand(100) == 50 || $player == 'Plancke') { 
+                broadcast(_tagmsg('vote', $player.' was SUPER MEGA lucky and won 250000 extra rupees!'))
+                acc_add($player, 250000)
+                die()
+            }
+            broadcast(_tagmsg('vote', $player.' was SUPER lucky and won 50000 extra rupees!'))
+            acc_add($player, 50000)
+            die()
+        }
+        broadcast(_tagmsg('vote', $player.' was lucky and won 5000 extra rupees!'))
+        acc_add($player, 5000)
+    }
+<<<

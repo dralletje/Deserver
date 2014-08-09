@@ -1,0 +1,37 @@
+/strikes [$player] = >>>
+    include('strikes.ms')
+    
+    if($player == null) {
+        @player = player()
+        _hasperm('banning.self')
+    } else {
+        @player = _player($player)
+        _hasperm('banning.other')
+    }
+
+    assign(@strikes, _strike_get(@player))
+    if(length(@strikes) == 0) {
+        msg(_tagmsg('police', @player.' has no strikes at all!'))
+    } else {
+        msg(_tagmsg('police', @player.'\'s strikes:'))
+        foreach(@strikes, @strike) {
+            msg(color(5).'* '.color(7).@strike)
+        }
+   } 
+<<<
+
+/strike $player $ = >>>
+    include('strikes.ms')
+    
+    _admin_hasperm()
+    _strike_add($player, $)
+<<<
+
+/strikes reset $player = >>>
+    include('strikes.ms')
+    
+    assign(@player, _player($player))
+    _hasperm('banning.reset')
+    clear_value('strike', to_lower(@player))
+    msg(_tagmsg('police', 'strikes reset of '.@player))
+<<<

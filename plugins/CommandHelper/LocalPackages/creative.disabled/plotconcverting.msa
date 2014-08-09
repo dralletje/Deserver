@@ -1,0 +1,62 @@
+######################################################
+## Sample command
+######################################################
+/plot convert [$number='current'] [$force=false] = >>>
+    if($number == 'current') {
+        assign(@plotcoords, _location_to_plot(ploc()))
+        assign(@mycoord, @plotcoords[0])
+    } else if(!is_integer($number)) {
+        die(_tagmsg('estate', 'That is not a number'))
+    } else {
+        assign(@mycoord, $number)
+    }
+	
+    set_timeout(10000, closure(
+    assign(@num, 0)
+    assign(@mycoord, replace(@mycoord, '-', '_'))
+    assign(@regions, get_values('plots.mercury', @mycoord))
+    
+	if(get_value('plots', 'processed', @mycoord, true) == true && $force != true) {
+		die(_tagmsg('estate', 'already processed, try force if you wanna redo'))
+	}
+	
+    foreach(
+        array_keys(@regions),
+        @key,
+        assign(@player, get_value(@key))
+        assign(@banana, reg_split('\\.', @key))
+        if(length(@banana) > 4) {
+            continue()
+        }
+        assign(@othercoord, @banana[3])
+        
+        assign(@regex, reg_match('[a-zA-Z0-9_]{2,16}',(@player)))
+        if(length(@regex) != 1) {
+            msg(@player.' is a bad username!!!!!')
+            _plot_wipe(array(@mycoord, @othercoord))
+            continue()
+        } 
+        
+        if(@regex[0] != @player) {
+            msg(@player.' is a bad username!!!!!')
+            _plot_wipe(array(@mycoord, @othercoord))
+            continue()
+        } 
+
+        _plot_add_player_plot(@player, _plot_to_location(array(@mycoord, @othercoord))[0])
+        if(@player == 'the_immortal') {
+            msg(_tagmsg('estate', 'Be happy, one of your plots is found'))
+        }
+        inc(@num) 
+    )
+    msg(_tagmsg('estate', @num.' plots proccessed'))
+	store_value('plots', 'processed', @mycoord, true)
+    ))
+<<<
+
+/plot lagg = >>>
+set_timeout(10000, closure(
+    get_values('plots.mercury')
+    msg('done')
+))
+<<<

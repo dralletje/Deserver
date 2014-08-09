@@ -1,0 +1,139 @@
+/zone set $name [$] = >>>
+    _hasperm('regions.set')
+    if(!_region_canbuild(ploc(), player())) {
+        die(_tagmsg('Vortex', 'You\'re not the owner of this zone, so I can\'t help you.'))
+    }
+    
+    assign(@waoh, parse_args($))
+    if(length(@waoh) != 0) {
+         store_value('regions', pworld(), $name, 'members', @waoh)
+     }
+     
+    store_value('regions', pworld(), 'locations', $name, ploc())
+    msg(_tagmsg('vortex', 'Zone added to my database, thanks you.'))
+<<<
+
+/zone add $player  = >>>
+    _hasperm('regions.add')
+    assign(@region, _region_from_location(ploc()))
+    if(!_region_canbuild(@region, player())) {
+        msg(_tagmsg('Vortex', 'You\'re not the owner of this zone, so I can\'t help you.'))
+    }
+
+    assign(@player, _player($player, 'name'))
+    assign(@members, get_value('regions', pworld(), @region, 'members'))
+    
+    if(!is_array(@members)) {
+        assign(@members, array())
+    }
+    if(array_contains_ic(@members, @player)) {
+        die(_tagmsg('Estate manager', 'Player was already added to this plot'))
+    }
+    array_push(@members, @player)
+    store_value('regions', pworld(), @region, 'members', @members)
+    msg(_tagmsg('Vortex', 'granted '.@player.' build access in your zone'))
+<<<
+
+/zone remove $player  = >>>
+    _hasperm('regions.remove')
+    assign(@region, _region_from_location(ploc()))
+    if(!_region_canbuild(@region, player())) {
+        msg(_tagmsg('Vortex', 'You\'re not the owner of this zone, so I can\'t help you.'))
+    }
+
+    assign(@player, _player($player, 'name'))
+    assign(@members, get_value('regions', pworld(), @region, 'members'))
+    
+    if(!is_array(@members)) {
+        assign(@members, array())
+    }
+    
+    _array_delete(@members, @player)
+    
+    store_value('regions', pworld(), @region, 'members', @members)
+    msg(_tagmsg('Estate manager', 'Player removed from your plot!'))
+<<<
+
+/zone members = >>>
+    _hasperm('regions.members')
+    assign(@region, _region_from_location(ploc()))
+    assign(@members, get_value('regions', pworld(), @region, 'members'))
+    msg(_tagmsg('Vortex', 'The following humanoids are allowed in this zone:'))
+    msg(color('7').array_implode(@members, ', '))
+<<<
+
+/zone name = >>>
+    _hasperm('regions.members')
+    assign(@region, _region_from_location(ploc()))
+    msg(_tagmsg('Vortex', 'This zone is called '.@region))
+<<<
+
+/region list [$param] = >>>
+    if($param == 'all') {
+        msg(_tagmsg('region', array_implode(sk_all_regions(pworld()), ', ')))
+        die()
+    }
+    @regions = sk_current_regions()
+    if(array_size(@regions) > 1) {
+        msg(_tagmsg('region', 'You are currently in these regions: '.array_implode(@regions, ', ')))
+    }
+    else if(array_size(@regions) == 1) {
+        msg(_tagmsg('region', 'You are currently in this region: '.array_implode(@regions, ', ')))
+    }
+    else {
+        msg(_tagmsg('region', 'You are not in any region'))
+    }
+<<<
+
+/region members = >>>
+    @regions = sk_current_regions()
+    foreach(@regions, @region, 
+        @regionar = sk_region_info(@region, pworld())
+        if(array_size(@regionar[2]) > 1) {
+            msg(_tagmsg('region', 'These players are member of the region '.@region.': '.array_implode(@regionar[2], ', ')))
+        }
+        else if(array_size(@regionar[2]) == 1) {
+            msg(_tagmsg('region', 'This player is a member of the region '.@region.': '.array_implode(@regionar[2], ', ')))
+        }
+        else {
+            msg(_tagmsg('region', 'There are no members in the region '.@region))
+        }
+    )
+<<<
+
+/region owners = >>>
+    @regions = sk_current_regions()
+    foreach(@regions, @region, 
+        @regionar = sk_region_info(@region, pworld())
+        if(array_size(@regionar[1]) > 1) {
+            msg(_tagmsg('region', 'These players are owners of the region '.@region.': '.array_implode(@regionar[1], ', ')))
+        }
+        else if(array_size(@regionar[1]) == 1) {
+            msg(_tagmsg('region', 'This player is a owner of the region '.@region.': '.array_implode(@regionar[1], ', ')))
+        }
+        else {
+            msg(_tagmsg('region', 'There are no owners in the region '.@region))
+        }
+    )
+<<<
+
+/region addmember $players = >>>
+    @regions = sk_current_regions()
+    @counter = 1
+    foreach(@regions, @region, 
+        if(!array_index_exists(@regions, @counter)) { @counter = 0 }
+        if(sk_region_volume(@region, pworld()) < sk_region_volume(@regions[@counter], pworld()) || array_size(@regions) == 1) {
+            if(array_contains(sk_region_info(@region, pworld())[1], to_lower(player())) || has_permission('rank.owner')) {
+                @members = reg_split(',', $players)
+                sk_region_addmember(@region, pworld(), @members)
+                if(array_size(@members) == 1) {
+                    msg(_tagmsg('region', array_size(@members).'player has been added as member to the region '.@region))
+                } 
+                else {
+                    msg(_tagmsg('region', array_size(@members).'players have been added as member to the region '.@region))
+                }
+            }
+        }
+        @counter = @counter + 1
+    )
+<<<

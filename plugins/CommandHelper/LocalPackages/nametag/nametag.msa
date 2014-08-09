@@ -1,0 +1,6 @@
+/redoprefix = >>>
+    _hasperm('rank.uberadmin')
+    include('nametag.ms')
+    _colorNames()
+    msg(_tagmsg('prefix', 'Prefixs above heads fixed'))
+<<<
